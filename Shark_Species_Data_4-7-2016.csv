@@ -1,24 +1,41 @@
-SPECIES,Binomial_Name,Other_Names,Water_Composition,Habitat,Migratory?,Max_Depth_M,Climate,Water_Temperature,Range,Length_Male_Unknown_CM,Length_Female_CM,Conservation_Status,Kingdom,Phylum,Class,Subclass,Superorder,Order,Family,Genus,Species
-WHITE SHARK,CARCHARODON CARCHARIAS,,brackish,Open Sea,Yes,250,Subtropical,," 66°N - 58°S, 180°W - 180°E ",541,594,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Lamniformes,Lamnidae,Carcharodon,C. carcharias
-TIGER SHARK,GALEOCERDO CUVIER ,,brackish,Bottom Dweller,Yes,350,Subtropical,,"62°N - 42°S, 180°W - 180°E",500,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Galeocerdo,G. cuvier
-BULL SHARK,CARCHARHINUS LEUCAS ,,"freshwater, brackish",Reef Associated,,152,Subtropical,,"42°N - 39°S, 117°W - 170°W",360,400,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. leucas
-SHORTFIN MAKO SHARK,ISURUS OXYRINCHUS ,,,Open Sea,Yes,740,Subtropical,,"61°N - 56°S, 180°W - 180°E",270,,Vulnerable,Animalia,Chordata,Chondrichthyes,,Selachimorpha,Lamniformes,Lamnidae,Isurus,I. oxyrinchus
-LEMON SHARK,NEGAPRION BREVIROSTRIS ,,brackish,Reef Associated,Yes,92,Subtropical,,"45°N - 39°S, 114°W - 0°",240,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Negaprion,N. brevirostris
-OCEANIC WHITETIP SHARK,CARCHARHINUS LONGIMANUS ,,,Open Sea,Yes,230,Subtropical,18°C - 28°C,"46°N - 43°S, 180°W - 180°E",270,,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. longimanus
-BLUE SHARK,PRIONACE GLAUCA ,,brackish,Open Sea,Yes,1000,Subtropical,7°C - 21°C,"66°N - 55°S, 180°W - 180°E ",335,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Prionace,P. glauca
-GALAPAGOS SHARK,CARCHARHINUS GALAPAGENSIS ,,,Reef Associated,,286,Tropical,,"36°N - 41°S, 180°W - 180°E",300,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. galapagensis
-CARIBBEAN REEF SHARK,CARCHARHINUS PEREZI ,,,,,,,,,,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. perezii
-DUSKY SHARK,CARCHARHINUS OBSCURUS,,,,,,,,,,,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. obscurus
-BLACKTIP SHARK,CARCHARHINUS LIMBATUS ,,,,,,,,,,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. limbatus
-SILKY SHARK,CARCHARHINUS FALCIFORMIS ,,,,,,,,,,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. falciformis
-GRAY REEF SHARK,CARCHARHINUS AMBLYRHYNCHOS ,,,,,,,,,,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. amblyrhynchos
-GREAT HAMMERHEAD SHARK,SPHYRNA MOKARRAN ,,,,,,,,,,,Endangered,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Sphyrnidae,Sphyrna,S. mokarran
-BLACKTIP REEF SHARK,CARCHARHINUS MELANOPTERUS ,,,,,,,,,,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. melanopterus
-BROADNOSE SEVENGILL SHARK,NOTORYNCHUS CEPEDIANUS ,,,,,,,,,,,Data Deficient,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Hexanchiformes,Hexanchidae,Notorynchus,N. cepedianus
-BLUNTNOSE SIXGILL SHARK,HEXANCHUS GRISEUS ,,,,,,,,,,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Hexanchiformes,Hexanchidae,Hexanchus,H. griseus
-NURSE SHARK,GINGLYMOSTOMA CIRRATUM ,,,,,,,,,,,Data Deficient,Animalia,Chordata,Chondrichthyes,Elasmobranchii,,Orectolobiformes,Ginglymostomatidae,Ginglymostoma,G. cirratum
-SAND TIGER,CARCHARIAS TAURUS ,,,,,,,,,,,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Lamniformes,Odontaspididae,Carcharias,C. taurus
-SPOTTED WOBBEGONG,ORECTOLOBUS MACULATUS,,,,,,,,,,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,,Orectolobiformes,Orectolobidae,Orectolobus,O. maculatus
-BASKING SHARK,CETORHINUS MAXIMUS ,,,,,,,,,,,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Lamniformes,Cetorhinidae,Cetorhinus,C. maximus
-SPINNER SHARK,CARCHARHINUS BREVIPINNA ,,,,,,,,,,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. brevipinna
-BRONZE WHALER SHARK,CARCHARHINUS BRACHYURUS,"COPPER SHARK, NARROWTOOTH SHARK",brackish,Reef Associated,Yes,360,Subtropical,,45°N - 52°S ,325,,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. brachyurus
+SPECIES,Binomial_Name,Other_Names,Water_Composition,Habitat,Migratory?,Max_Depth_M,Climate,Water_Temperature,Range_NS,Range_EW,Length_Unsexed_CM,Conservation_Status,Kingdom,Phylum,Class,Subclass,Superorder,Order,Family,Genus,Species
+WHITE SHARK,CARCHARODON CARCHARIAS,,brackish,Pelagic-oceanic,Yes,250,Subtropical,,66°N - 58°S, 180°W - 180°E ,541,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Lamniformes,Lamnidae,Carcharodon,C. carcharias
+TIGER SHARK,GALEOCERDO CUVIER ,,brackish,Benthopelagic,Yes,350,Subtropical,,62°N - 42°S, 180°W - 180°E,500,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Galeocerdo,G. cuvier
+BULL SHARK,CARCHARHINUS LEUCAS ,,"freshwater, brackish",Reef Associated,,152,Subtropical,,42°N - 39°S, 117°W - 170°W,360,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. leucas
+SHORTFIN MAKO SHARK,ISURUS OXYRINCHUS ,,,Pelagic-oceanic,Yes,740,Subtropical,,61°N - 56°S, 180°W - 180°E,270,Vulnerable,Animalia,Chordata,Chondrichthyes,,Selachimorpha,Lamniformes,Lamnidae,Isurus,I. oxyrinchus
+LEMON SHARK,NEGAPRION BREVIROSTRIS ,,brackish,Reef Associated,Yes,92,Subtropical,,45°N - 39°S, 114°W - 0°,240,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Negaprion,N. brevirostris
+OCEANIC WHITETIP SHARK,CARCHARHINUS LONGIMANUS ,,,Pelagic-oceanic,Yes,230,Subtropical,18°C - 28°C,46°N - 43°S, 180°W - 180°E,270,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. longimanus
+BLUE SHARK,PRIONACE GLAUCA ,,brackish,Pelagic-oceanic,Yes,1000,Subtropical,7°C - 21°C,66°N - 55°S, 180°W - 180°E ,335,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Prionace,P. glauca
+GALAPAGOS SHARK,CARCHARHINUS GALAPAGENSIS ,,,Reef Associated,,286,Tropical,,36°N - 41°S, 180°W - 180°E,300,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. galapagensis
+CARIBBEAN REEF SHARK,CARCHARHINUS PEREZI ,,,Reef Associated,,65,Subtropical,,33°N - 35°S, 100°W - 33°W,300,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. perezii
+DUSKY SHARK,CARCHARHINUS OBSCURUS,,brackish,Reef Associated,Yes,400,Subtropical,,45°N - 46°S, 120°W - 156°E,250,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. obscurus
+BLACKTIP SHARK,CARCHARHINUS LIMBATUS ,,brackish,Reef Associated,,100,Subtropical,,45°N - 38°S, 166°W - 171°E,150,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. limbatus
+SILKY SHARK,CARCHARHINUS FALCIFORMIS ,,,Reef Associated,Yes,4000,Subtropical,23°C - 24°C,42°N - 43°S, 169°W - 180°E,250,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. falciformis
+GRAY REEF SHARK,CARCHARHINUS AMBLYRHYNCHOS ,,,Reef Associated,Yes,4000,Subtropical,23°C - 24°C,42°N - 43°S, 169°W - 180°E,250,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. amblyrhynchos
+GREAT HAMMERHEAD SHARK,SPHYRNA MOKARRAN ,,,Pelagic-oceanic,Yes,300,Subtropical,,45°N - 37°S, 180°W - 180°E,370,Endangered,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Sphyrnidae,Sphyrna,S. mokarran
+BLACKTIP REEF SHARK,CARCHARHINUS MELANOPTERUS ,,brackish,Reef Associated,,75,Subtropical,,35°N - 25°S, 7°E - 134°W,200,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. melanopterus
+BROADNOSE SEVENGILL SHARK,NOTORYNCHUS CEPEDIANUS ,,brackish,Demersal,,570,Subtropical,,56°N - 55°S, 131°W - 177°E,150,Data Deficient,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Hexanchiformes,Hexanchidae,Notorynchus,N. cepedianus
+BLUNTNOSE SIXGILL SHARK,HEXANCHUS GRISEUS ,,,Bathydemersal,Yes,2500,Subtropical,, 65°N - 48°S, 180°W - 180°E,300,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Hexanchiformes,Hexanchidae,Hexanchus,H. griseus
+NURSE SHARK,GINGLYMOSTOMA CIRRATUM ,,brackish,Reef Associated,,130,Subtropical,,44°N - 35°S, 122°W - 10°E ,304,Data Deficient,Animalia,Chordata,Chondrichthyes,Elasmobranchii,,Orectolobiformes,Ginglymostomatidae,Ginglymostoma,G. cirratum
+SAND TIGER,CARCHARIAS TAURUS ,,,Reef Associated,Yes,191,Subtropical,,45°N - 48°S, 100°W - 155°E,250,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Lamniformes,Odontaspididae,Carcharias,C. taurus
+SPOTTED WOBBEGONG,ORECTOLOBUS MACULATUS,,,Reef Associated,,110,Temperate,,20°S - 40°S, 113°E - 154°E,180,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,,Orectolobiformes,Orectolobidae,Orectolobus,O. maculatus
+BASKING SHARK,CETORHINUS MAXIMUS ,,,Pelagic-oceanic,Yes,2000,Temperate, 6°C - 24°C ,75°N - 58°S, 112°E - 42°E ,700,Vulnerable,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Lamniformes,Cetorhinidae,Cetorhinus,C. maximus
+SPINNER SHARK,CARCHARHINUS BREVIPINNA ,,,Reef Associated,Yes,100,Subtropical,,40°N - 38°S, 100°W - 155°E,250,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. brevipinna
+BRONZE WHALER SHARK,CARCHARHINUS BRACHYURUS,"COPPER SHARK, NARROWTOOTH SHARK",brackish,Reef Associated,Yes,360,Subtropical,,45°N - 52°S ,,325,Near Threatened,Animalia,Chordata,Chondrichthyes,Elasmobranchii,Selachimorpha,Carcharhiniformes,Carcharhinidae,Carcharhinus,C. brachyurus
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,
