@@ -1,0 +1,43 @@
+---
+title: "SharkAttack"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The following data sets are provided to analyze Shark Attack.
+
+```{r}
+# http://www.huffingtonpost.com/norm-schriever/coming-down-from-shark-we_b_3740495.html
+suppressMessages(library(readr))
+suppressMessages(library(tidyr))
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+# attack location, how many people in the area, water realted env variables, date, time
+SAdata <- read_csv("Shark_Attack_Data_4-7-2016.csv",col_names=TRUE,n_max=5897)
+SharkSpecies <- tbl_df(read_csv("Shark_Species_Data_4-7-2016.csv"))
+Sharks <- read_csv("Sharks_4-7-2016.csv")
+```
+
+## Analyze area, location
+
+Note that "Unprovoked attacks" are defined as incidents where an attack on a live human occurs in the shark’s natural habitat with no human provocation of the shark.
+
+```{r}
+SA_tab <- SAdata[1:19] 
+SA_tab %>% select(`Case Number`,Date,Year,Location,Area,Country) %>% 
+  group_by(Location,Area,Country) %>% summarize(n=n()) %>% 
+  filter(is.na(Area)) %>% View()
+SA_tab %>% group_by(Location) %>% select(`Case Number`,Date,Year,Area) %>%
+  summarize(n=n()) %>% print(n=3838)
+```
+
+# include plots
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
