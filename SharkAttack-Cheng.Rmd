@@ -89,8 +89,8 @@ Let's try a record of shark attack data.
 ##Test with a single address
 address <- geoCode("The White House, Washington, DC")
 address
-#[1] "38.8976831"
-#[2] "-77.0364972"
+#[1] "38.8976831"  lat
+#[2] "-77.0364972" lon
 #[3] "APPROXIMATE"
 #[4] "The White House, 1600 Pennsylvania Avenue Northwest, Washington, D.C., DC 20500, USA"
  
@@ -98,7 +98,10 @@ address
 address <- c("The White House, Washington, DC","The Capitol, Washington, DC")
 locations <- ldply(address, function(x) geoCode(x))
 names(locations) <- c("lat","lon","location_type", "forAddress")
-points(locations$lat,locations$lon, col="red", pch=16)
+
+map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
+points(as.numeric(locations$lon),as.numeric(locations$lat), 
+       col="red", pch=16)
  
 #Location type, for more info check here: https://developers.google.com/maps/documentation/directions/
 #"ROOFTOP" indicates that the returned result is a precise geocode for which we have location information accurate down to street address precision.
@@ -116,17 +119,26 @@ if (any( is.na(USA_tab))) {
   USA_tab[is.na(USA_tab)] <- ""
 }
 address <- do.call(paste, c(USA_tab, sep=" "))
-locations <-  ldply(address, function(x) geoCode(x))
+locations <-  ldply(address[1:50], function(x) geoCode(x))
+loc <- locations %>% na.omit()
+loc
+map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
+points(as.numeric(loc$V2),as.numeric(loc$V1), col="red", pch=16)
 
-ts <- c("\x93Southern Wharf\x94 South Carolina USA",
-        "Bull\x92s Bay, near Charleston South Carolina USA")
+#ts <- c("\x93Southern Wharf\x94 South Carolina USA",
+#        "Bull\x92s Bay, near Charleston South Carolina USA")
+#str_split (ts, "[\\\]x[\\d]{1,2}", perl=TRUE)
+
 ts <- c("Bridgeport, Fairfield County Connecticut USA",
         "Avalon, Los Angeles County California USA",
         " Hawaii USA", "Palm Beach, Palm Beach County Florida USA",
         "Ocean City (offshore) New Jersey USA",
         "Staten Island New York USA")
 locations <-  ldply(ts, function(x) geoCode(x))
-points(locations$lat,locations$lon, col="red", pch=16)
+names(locations) <- c("lat","lon","location_type", "forAddress")
+locations
+points(as.numeric(locations$lon),as.numeric(locations$lat), 
+       col="red", pch=16)
 ```
 
 ## World Ocean Database
