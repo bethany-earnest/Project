@@ -31,7 +31,7 @@ SA_tab %>% select(`Case Number`,Date,Year,Location,Area,Country) %>%
   group_by(Location,Area,Country) %>% summarize(n=n()) %>% 
   filter(is.na(Area)) %>% View()
 SA_tab %>% group_by(Location) %>% select(`Case Number`,Date,Year,Area) %>%
-  summarize(n=n()) %>% print(n=3838)
+  summarize(n=n())
 ```
 
 # include plots
@@ -121,12 +121,16 @@ if (any( is.na(USA_tab))) {
 address <- do.call(paste, c(USA_tab, sep=" "))
 locations <-  ldply(address[1:50], function(x) geoCode(x))
 loc <- locations %>% na.omit()
-loc
+
 map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
 points(as.numeric(loc$V2),as.numeric(loc$V1), col="red", pch=16)
 
-#ts <- c("\x93Southern Wharf\x94 South Carolina USA",
-#        "Bull\x92s Bay, near Charleston South Carolina USA")
+sub("(a+)", "z\\1z", c("abc", "def", "cba a", "aa"), perl=TRUE)
+gsub("(a+)", "z\\1z", c("abc", "def", "cba a", "aa"), perl=TRUE)
+
+ts <- c("\x93Southern Wharf\x94 South Carolina USA",
+        "Bull\x92s Bay, near Charleston South Carolina USA")
+gsub("[\\p{Cc}]","",ts, perl=TRUE)
 #str_split (ts, "[\\\]x[\\d]{1,2}", perl=TRUE)
 
 ts <- c("Bridgeport, Fairfield County Connecticut USA",
@@ -136,7 +140,7 @@ ts <- c("Bridgeport, Fairfield County Connecticut USA",
         "Staten Island New York USA")
 locations <-  ldply(ts, function(x) geoCode(x))
 names(locations) <- c("lat","lon","location_type", "forAddress")
-locations
+
 points(as.numeric(locations$lon),as.numeric(locations$lat), 
        col="red", pch=16)
 ```
