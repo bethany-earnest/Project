@@ -36,8 +36,99 @@ SA_tab %>% group_by(Location) %>% select(`Case Number`,Date,Year,Area) %>%
 
 # include plots
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r worldmap}
+library("ggmap")
+library(maptools)
+library(maps)
+visited <- c("SFO", "Chennai", "London", "Melbourne")
+ll.visited <- geocode(visited)
+visit.x <- ll.visited$lon
+visit.y <- ll.visited$lat
+#USING MAPS
+map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
+points(visit.x,visit.y, col="red", pch=16)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+A section of geocoding code.
+
+```{r geocoding}
+#### This script uses RCurl and RJSONIO to download data from Google's API:
+#### Latitude, longitude, location type (see explanation at the end), formatted address
+#### Notice ther is a limit of 2,500 calls per day
+library(bitops) 
+library(RCurl)
+library(RJSONIO)
+library(plyr)
+ 
+url <- function(address, return.call = "json", sensor = "false") {
+ root <- "http://maps.google.com/maps/api/geocode/"
+ u <- paste(root, return.call, "?address=", address, "&sensor=", sensor, sep = "")
+ return(URLencode(u))
+}
+ 
+geoCode <- function(address,verbose=FALSE) {
+ if(verbose) cat(address,"\n")
+ u <- url(address)
+ doc <- getURL(u)
+ x <- fromJSON(doc,simplify = FALSE)
+ if(x$status=="OK") {
+ lat <- x$results[[1]]$geometry$location$lat
+ lng <- x$results[[1]]$geometry$location$lng
+ location_type <- x$results[[1]]$geometry$location_type
+ formatted_address <- x$results[[1]]$formatted_address
+ return(c(lat, lng, location_type, formatted_address))
+ } else {
+ return(c(NA,NA,NA, NA))
+ }
+}
+```
+
+Let's try a record of shark attack data.
+
+```{r}
+##Test with a single address
+address <- geoCode("The White House, Washington, DC")
+address
+#[1] "38.8976831"
+#[2] "-77.0364972"
+#[3] "APPROXIMATE"
+#[4] "The White House, 1600 Pennsylvania Avenue Northwest, Washington, D.C., DC 20500, USA"
+ 
+# Use plyr to getgeocoding for a vector
+address <- c("The White House, Washington, DC","The Capitol, Washington, DC")
+locations <- ldply(address, function(x) geoCode(x))
+names(locations) <- c("lat","lon","location_type", "forAddress")
+points(locations$lat,locations$lon, col="red", pch=16)
+ 
+#Location type, for more info check here: https://developers.google.com/maps/documentation/directions/
+#"ROOFTOP" indicates that the returned result is a precise geocode for which we have location information accurate down to street address precision.
+#RANGE_INTERPOLATED" indicates that the returned result reflects an approximation (usually on a road) interpolated between two precise points (such as intersections). Interpolated results are generally returned when rooftop geocodes are unavailable for a street address.
+#GEOMETRIC_CENTER" indicates that the returned result is the geometric center of a result such as a polyline (for example, a street) or polygon (region).
+#APPROXIMATE" indicates that the returned result is approximate.
+```
+
+Let's plot the attacks in USA.
+
+```{r}
+USA_tab <- SA_tab %>% filter(Country=="USA") %>%
+  select(Location,Area,Country) 
+if (any( is.na(USA_tab))) {
+  USA_tab[is.na(USA_tab)] <- ""
+}
+address <- do.call(paste, c(USA_tab, sep=" "))
+locations <-  ldply(address, function(x) geoCode(x))
+
+ts <- c("\x93Southern Wharf\x94 South Carolina USA",
+        "Bull\x92s Bay, near Charleston South Carolina USA")
+ts <- c("Bridgeport, Fairfield County Connecticut USA",
+        "Avalon, Los Angeles County California USA",
+        " Hawaii USA", "Palm Beach, Palm Beach County Florida USA",
+        "Ocean City (offshore) New Jersey USA",
+        "Staten Island New York USA")
+locations <-  ldply(ts, function(x) geoCode(x))
+points(locations$lat,locations$lon, col="red", pch=16)
+```
+
+## World Ocean Database
+https://crudata.uea.ac.uk/cru/data/temperature/
+https://www.nodc.noaa.gov/OC5/SELECT/dbsearch/dbsearch.html
