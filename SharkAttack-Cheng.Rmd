@@ -146,5 +146,14 @@ points(as.numeric(locations$lon),as.numeric(locations$lat),
 ```
 
 ## World Ocean Database
+### Extracting NOAA sea temperatures with ncdf4
+The demo following the instruction @ http://lukemiller.org/index.php/2014/11/extracting-noaa-sea-surface-temperatures-with-ncdf4/ is coded in the R chunk as follows.
 https://crudata.uea.ac.uk/cru/data/temperature/
 https://www.nodc.noaa.gov/OC5/SELECT/dbsearch/dbsearch.html
+
+```{r}
+source("NOAA_OISST_ncdf4.R")
+ssts = extractOISSTdaily("sst.day.mean.2014.v2.nc","daily/lsmask.oisst.v2.nc",lonW=0,lonE=70,latS=-50,latN=20,date1='2014-11-23',date2='2014-11-24')
+plotOISST(ssts,2)
+```
+
