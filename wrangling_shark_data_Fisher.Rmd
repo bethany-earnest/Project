@@ -1,0 +1,498 @@
+---
+title: "Wrangling Shark Attack Data: Species & Activity"
+author: "Fisher"
+date: "April 13, 2016"
+output: html_document
+---
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+library(readr)
+library(dplyr)
+library(stringr)
+library(stringi)
+library(knitr)
+library(wordcloud)
+library(gridExtra)
+```
+
+```{r}
+# Load the data 
+dat <- read_csv("Shark_Attack_Data_4-7-2016.csv",col_names=TRUE,n_max=5897) #5897=last good row
+dat[24] <- NULL #remove null rows and repeated Case Number rows
+dat[23] <- NULL
+dat[21] <- NULL
+dat[20] <- NULL
+```
+
+```{r,eval=FALSE}
+# Working with Windows to Unicode special characters...
+
+#dat %>% filter(grepl("(Bay, near Charleston)",Location)) %>% select(Location) %>% #View()
+#  mutate(Location=iconv(Location,from="CP1252",to="UTF-8")) %>% View()
+#  #filter(grepl("([’])",Location)) %>% View()
+#dat %>% filter(grepl("(Bay, near Charleston)",Location)) %>% select(Location) %>% 
+#  mutate(Location=stri_escape_unicode(iconv(Location,from="CP1252",to="UTF-8"))) %>% 
+#  #mutate(Location=gsub("’","",Location,perl=TRUE)) %>% View()
+#  mutate(Location=gsub("(\\\\u2019)","'",Location,perl=TRUE)) %>% View()
+```
+
+##Wrangle the Species column
+The Species variable provides textual descriptions of the species of shark reported in the shark attack. The descriptions are free form. In addition to possibly including the **type of shark**, many entries include its **size** (length and/or weight range), **gender**, and other miscellaneous information. Therefore, the Species variable needs to be wrangled, or normalized, so that the shark types can be parsed and extracted. As the additional information contained in a Species entry may be useful for downstream processing and analysis, it is also wrangled and used to create additional variables, e.g., length, weight, and gender.
+
+Note, only `r dat %>% filter(!is.na(Species)) %>% nrow()` of `r nrow(dat)` reported incidents contain information about the shark species.
+
+####Normalize the Species descriptions
+
+General normalization...
+```{r}
+## Normalize all Species column entries
+
+dat2 <- dat %>% filter(!is.na(Species)) %>% 
+  mutate(Species=iconv(Species,from="CP1252",to="UTF-8"),
+         Species=stri_trans_tolower(Species)) %>% 
+  select(`Case Number`,Species) # Lowercase all Species text
+
+dat2 <- dat2 %>% filter(!is.na(Species)) %>%
+  mutate(Species=gsub("([0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{4})"," ",Species))
+# Remove annoying unicode characters
+dat2 <- dat2 %>% filter(!is.na(Species)) %>%
+  mutate(Species=gsub("(\u393C|\u3E33|\u613C|\u3E30|\u3E34|\u623C|\u3E64|\uFFFD)","",Species))
+
+## Remove all double quotes at the beginning and end of each Species entry
+dat2 <- dat2 %>% filter(!is.na(Species)) %>% 
+  mutate(Species=gsub(pattern="(^|[\\s])[\"]"," ",Species), #from beginning  “
+         #Species=gsub(pattern="([^0-9])([\"])([\\S]|$)","\\1",Species)) #ending (unless preceded by a digit)
+         Species=gsub(pattern="([\"])([a-z -]+)([\"])","\\2",Species),
+         Species=gsub(pattern="([a-z -]+)([\"])","\\1",Species))
+
+dat2 <- dat2 %>% filter(!is.na(Species)) %>% #Remove unnecessary punctuation
+  mutate(Species=gsub(pattern="([a-zA-Z])[\\.]","\\1 ",Species), #removes word-final periods
+         Species=gsub(pattern="\\?+"," ",Species), #removes question marks
+         Species=gsub(pattern="[,;:]"," ",Species), #removes commas & semicolons
+         Species=gsub(pattern="\\[|\\]"," ",Species), #removes square brackets
+         Species=gsub(pattern="\\(|\\)"," ",Species)) #, #remove parentheses
+         #Species=gsub(pattern="([e])[\"][\\s]","\\1 ",Species)) #strange double quote won't go away.
+
+
+dat2 <- dat2 %>% filter(!is.na(Species)) %>% #normalize shark length descriptions
+  mutate(Species=gsub(pattern="pound","lb",Species), #pound to lb
+    Species=gsub(pattern="(\\d)(\\s|-)(metre|m|meter|cm|ft|feet|foot|kg|lb|lbs)(\\s|$)","\\1\\3 ",Species),
+         Species=gsub(pattern="(\\d)(?-)(ft|feet|foot)(\\s|$)","\\1' ",Species),
+         Species=gsub(pattern="(\\d)(?-)(meter|metre)(\\s|$)","\\1m ",Species)) 
+
+dat2 <- dat2 %>% filter(!is.na(Species)) %>%
+  mutate(Species=gsub(pattern="(\\w)(\\s|-)(tipped)(\\s|$|\")","\\1tip ",Species), #normalizes tipped to tip
+         Species=gsub(pattern="(sharks|shar k|shar ;)","shark",Species), # normalize 'shark'
+         Species=gsub(pattern="( shar)\\s+([^k])"," shark \\2",Species), # normalize 'shark'
+         
+         Species=gsub(pattern="(\\d)(')(shark)","\\1\\2 \\3",Species), #5'shark to 5' shark
+         Species=gsub(pattern=" (\")(\\w)"," \\2",Species), #turns "word into word
+         Species=gsub(pattern="(fragment|wobbegong|day|pointer)(s)","\\1",Species), #plural to singular
+         Species=gsub(pattern=" & "," and ",Species), # & to and
+         Species=gsub(pattern="zambezi","zambesi",Species), #zambesi
+         Species=gsub(pattern="grey","gray",Species), #gray
+         Species=gsub(pattern="(seven gill|seven-gill|7-gill)","sevengill",Species), # sevengill
+         Species=gsub(pattern="(sandtiger|sand-tiger)","sand tiger",Species), # sand tiger
+         Species=gsub(pattern="([\\s]nose|-nosed|[\\s]nosed)","nose",Species)) # broadnose, ..nose
+
+dat2 <- dat2 %>% filter(!is.na(Species)) %>%
+  mutate(Species=gsub(pattern="catshark","cat shark",Species))
+
+dat2 <- dat2 %>% filter(!is.na(Species)) %>%
+  mutate(Species=gsub("(not confirmed|not cofirmed)","unconfirmed",Species))
+
+dat2 <- dat2 %>% filter(!is.na(Species)) %>%
+  mutate(Species=gsub("(not authenticated)","unauthenticated",Species))
+
+
+#Remove stop words from entries
+#dat2 <- dat2 %>% filter(!is.na(Species)) %>%
+#  mutate(Species=gsub("(^|\\s)(another|been|a|as|an|by|of|or|on|that|his|but|it|its|their|than|from|have|out|were|be|is|was|later|on|with|and|the|')($|\\s)"," ",Species))
+dat2 <- dat2 %>% filter(!is.na(Species)) %>%
+  mutate(Species=gsub("(^|\\s)(another|been|a|as|an|by|of|or|on|that|his|but|it|its|their|than|from|have|out|were|be|is|was|later|on|with|and|the)($|\\s)"," ",Species))
+
+dat2 <- dat2 %>% filter(!is.na(Species)) %>% 
+  mutate(Species=gsub(pattern="\\s+"," ",Species)) #Reduce multiple spaces to 1 space
+
+#dat2 %>% filter(!is.na(Species)) %>% select(Species) %>% View()
+#dat2$Species[675]
+```
+
+The following word clouds illustrate the textual information contained in the Species column. 
+```{r,echo=FALSE}
+species_texts <- dat2 %>% filter(!is.na(Species)) %>% select(Species)
+species_text <- paste(unlist(species_texts),sep=" ",collapse = " ")
+#species_text <- gsub(" [\\.] "," ",species_text)
+#species_text <- gsub("[\\p{Cc}]","",species_text,perl=TRUE) # remove cntrl characters
+
+species_tokens <- unlist(str_split(species_text," "))
+species_token_counts <- as.data.frame(table(species_tokens)) %>% filter(nchar(as.character(species_tokens))>2)
+#species_token_counts %>% View()
+
+# Show the words relative to frequency
+wordcloud(species_token_counts$species_tokens,
+          species_token_counts$Freq,min.freq = 4,#c(4,1),
+          random.order=FALSE, 
+          colors=brewer.pal(8, "Dark2"))
+
+cat("Leaving out the most frequent word 'shark'...",sep="")
+tmp <- species_token_counts %>% filter(species_tokens!="shark")
+wordcloud(tmp$species_tokens,tmp$Freq,
+            min.freq = 4,#c(4,1),
+            random.order=FALSE, 
+            colors=brewer.pal(8, "Dark2"))
+
+#gridExtra::grid.arrange(wc1,wc2,nrow=1)
+
+# write the species tokens out to csv file.
+#write.csv(species_token_counts,"species_column_tokens.csv",row.names = FALSE,quote=FALSE)
+
+# From species_tokens, identify the morphological characteristics 
+# of size (length, weight) and gender descriptions
+
+
+```
+
+
+
+```{r,eval=FALSE,echo=FALSE}
+shark_texts <- species_texts %>% 
+  mutate(shark.type=ifelse(grepl("shark",Species,fixed=TRUE),
+                        str_extract_all(Species,"([^\\d\\s-']+[a-z]{2,9}[\\s]+){1,2}(shark)"),
+                           Species),
+         shark.type=ifelse(shark.type=="character(0)",NA,shark.type))
+
+shark_texts <- shark_texts %>% #filter(is.na(shark.type)) %>% 
+  mutate(shark.type=ifelse(is.na(shark.type),paste0(str_extract_all(Species,"(shovelnose|guitarfish|white|tiger|bull|shortfin|mako|lemon|oceanic|whitetip|blue|bluenose|blue pointer|galapagos|galagapos|caribbean|reef|dusky|blacktip|silky|gray|reef|great|hammerhead|blacktip|reef|broadnose|sevengill|bluntnose|sixgill|tawney|tawny|nurse|sand|tiger|spotted|catshark|cat|wobbegong|basking|spinner|bronze whaler|bronze|whaler|carchar[^\\s]+)"),sep=" "),shark.type),
+         shark.type=ifelse(shark.type=="character(0)",NA,shark.type))
+
+shark_texts <- shark_texts %>% 
+  mutate(shark.type=ifelse(grepl("c\\(",shark.type),gsub("(c\\(|[,\"]|\\))","",shark.type),shark.type))
+
+shark_texts <- shark_texts %>% 
+  mutate(shark.type=ifelse(grepl("character\\(0\\)",shark.type),NA,shark.type))         
+tmp <- shark_texts %>% filter(!is.na(shark.type)) %>% select(shark.type) 
+
+tmp <- sort(unlist(tmp)) #%>% sort(shark.type)
+
+removeStuff <- function(s){
+  s <- gsub("(^|[\\s]+)(to|\\/|c|in|authenticated|recovered|fragment|species|attack|reported|not|female|remains|likely|the|after|aka|recovered|caused|cold|description|diameter|dr|dried|probable|incident|believed|identified|involve|possibly|little|small|juvenile|large|[a-z]|[\\.\\d\'\"]+|[\\d][\\.]?[\\dmc]{1,2})([\\s]|$)"," ",s, perl = TRUE)
+  s <- gsub("[\\s]+"," ",s, perl = TRUE)
+  (str_trim(s))
+}
+
+#shark_names <- sapply(tmp$shark.type,FUN=removeStuff) %>% table() %>% as.data.frame()
+shark_names <- sapply(tmp,FUN=removeStuff) %>% table() %>% as.data.frame()
+colnames(shark_names) <- c("name","freq")
+shark_names <- shark_names[-1,] %>% filter(name!="shark")
+#shark_names %>% View()
+
+
+#write.csv(shark_names,file = "shark_names_1.csv",row.names = FALSE)
+
+#shark_names %>% arrange(desc(Freq)) %>% head(20)
+#shark_names %>% arrange(desc(Freq)) %>% tail(20)
+
+wordcloud(shark_names$name,shark_names$freq,
+            min.freq = 2,#c(4,1),
+            #random.order=FALSE, 
+            colors=brewer.pal(8, "Dark2"))
+
+shark_names_text <- str_trim(paste(shark_names$name,collapse=" "))
+shark_name_words <- as.data.frame(table(w=str_split(shark_names_text," ")))
+shark_name_words <- shark_name_words %>% filter(w!="shark")
+wordcloud(shark_name_words$w,shark_name_words$Freq,
+            min.freq = 3,c(2.5,1),
+            #random.order=FALSE, 
+            colors=brewer.pal(6, "Dark2"))
+```
+
+As illustrated, further wrangling is needed. The word clouds show a variety of information that is not in itself categorically coherent. 
+
+##Extracting from the Species Column
+After exploring, normalizing, analyzing, and visualizing the species entry descriptions, the next step is to extract the three categories. Let's extract the Species descriptions into three distinct categories: (1) Shark Type, describing the type of shark; (2) Size, describing the size of the shark; and (3) Gender. 
+
+####Shark Type (aka Species)
+Here, we'll add a new column (variable) containing textual descriptions of the species of shark in an attack. This will be cross-correlated with the Shark Species data set.
+
+```{r}
+# sharky words..
+
+#shark_type_pattern <- "(zygena|zygaena|albimarginatus|bamboo|blackfin|blacktip|blue|blue fin|bluefin|bluenose|nose|bonito|bonnethed|bronze|brown|brown-colored|bull|canicula|carcharhinid|carcharhinus|carchar[^\\s]+|caribbean|cat |catshark|cocktail|copper|cow|dog|dusky|francisci|galapagensis|galapagos|galap[^\\s]+|galeolamna|gangeticus|gray|ground|guitarfish|gummy|hammerhead|heterodontus|hooked shot|horn|lemon|leopard|leucas|long thin brown-colored|longfin|loxodon|maculipinnis|mako|nurse|obscurus|oceanic|perezi|porbeagle|raggedtooth|reef|rhizoprionodon|salmon|sand|sandbar|scalloped|scyliorhinus|sevengill|shark|shortfin|shovelnose|silky|silvertip|sixgill|smooth|soupfin|spinner|spotted|spurdog|tawney|tawny|thresher|tintorera|tintorero|whaler|white|whitetip|whtietip|wobbegong|zambesi)"
+
+shark_type_terms <- c("zygena", "zygaena", "albimarginatus", "bamboo", "blackfin", "blacktip", "blue", "blue fin", "bluefin", "bluenose", "nose", "bonito", "bonnethed", "bronze", "brown", "brown-colored", "bull", "canicula", "carcharinid", "carcharhinid", "carcharhinus", "caribbean", "cat ", "catshark", "cocktail", "copper", "cow", "dog  ", "dusky", "francisci", "galapagensis", "galapagos", "galap[^\\s]+|galeolamna", "gangeticus", "gray", "ground", "guitarfish", "gummy", "hammerhead", "heterodontus", "hooked shot", "horn", "lemon", "leopard", "leucas", "long thin brown-colored", "longfin", "loxodon", "maculipinnis", "mako", "nurse", "obscurus", "oceanic", "perezi", "pointer","porbeagle", "raggedtooth", "reef", "rhizoprionodon", "salmon", "sand", "sandbar", "scalloped", "scyliorhinus", "sevengill", "shark", "shortfin", "shovelnose", "silky", "silvertip", "sixgill", "smooth", "soupfin", "spinner", "spotted", "spurdog", "tawney", "tawny", "thresher", "tiger","tintorera", "tintorero", "whaler", "white", "whitetip", "whtietip", "wobbegong", "zambesi", "no shark")
+
+# Remove non-descriptive words..
+removeNonTypeWords <- function(s){
+  s <- gsub("(^| )(involvement|unconfirmed|description|allegedly|identified|recovered|according|inflicted|reported|diameter|fragment|probable|incident|benjamin|believed|juvenile|possibly|alleged|buttery|present|several|speared|thought|species|involve|remains|bitten|female|attack|caused|killed|little|injury|likely|after|bites|clyde|small|large|dried|cold|post|the|aka|cm|dr|in|kg|lb|to|m|\\/|[a-z0-9\\.]|[\\.\\d\'\"]+|[\\d][\\.]?[\\dmc]{1,2})( |$)"," ",s, perl = TRUE)
+  #removed authenticated
+  s <- gsub("( to )","",s,perl=TRUE)
+  s <- gsub("[^a-z ]+"," ",s,perl=TRUE)
+  s <- gsub("( nosed )"," nose ",s, perl = TRUE)
+  s <- ifelse(grepl("(leucas)",s, perl = TRUE),"bull shark",s)
+  s <- ifelse(grepl("(hoax| not |no shark)",s, perl = TRUE),"no shark",s)
+  s <- gsub("whtietip","whitetip",s, perl = TRUE)
+  s <- gsub("tawny","tawney",s, perl = TRUE)
+  
+  s <- gsub("[\\s]+"," ",s, perl = TRUE)
+  (str_trim(s))
+}
+
+restrictToSharkTerms <- function(s){
+  
+  if(s=="no shark"){
+    return(s)
+  }
+  
+  tokens <- as.list(str_split(s," ")[[1]])
+  tokens <- tokens[which(tokens%in%shark_type_terms)]
+  s <- str_trim(paste0(tokens,collapse=" "))
+  if(nchar(s)>0){
+    return(s)
+  }
+  return(NA)
+}
+
+shark_types <- dat2 %>% filter(!is.na(Species)) %>% 
+  mutate(shark_type=removeNonTypeWords(Species),
+         shark_type=sapply(shark_type,FUN=restrictToSharkTerms),
+         shark_type=gsub("^(shark )","",shark_type),
+         shark_type=gsub("albimarginatus","silvertip shark",shark_type),
+         shark_type=gsub("gangeticus","ganges",shark_type),
+         shark_type=ifelse(grepl("(shark)",shark_type),shark_type,paste(shark_type," shark",sep=""))
+         )
+
+#write.csv(shark_types,file = "shark_types_2.csv",row.names = FALSE)
+
+all_shark_type_text <- shark_types %>% mutate(shark_type=gsub("shark","",shark_type)) %>% 
+  select(shark_type)
+all_shark_type_tokens <- str_split(paste(unlist(all_shark_type_text),collapse=" ")," ")
+all_shark_type_terms <- as.data.frame(table(term=all_shark_type_tokens))[-1,] %>% filter(!is.na(term)|term!="NA")
+
+all_shark_type_terms %>% arrange(desc(Freq)) %>% kable
+
+wordcloud(all_shark_type_terms$term,all_shark_type_terms$Freq,
+            min.freq = 2,c(2.5,1),
+            #random.order=FALSE, 
+            colors=brewer.pal(6, "Dark2"))
+
+```
+
+####Shark Size
+
+```{r}
+feet_pattern <- c("([\\d\\.]+)(\')")
+inches_pattern <- c("([\\d\\.]+)(\")")
+meters_pattern <- c("([\\d\\.]+)(m)")
+cm_pattern <- c("([\\d\\.]+)(cm)")
+kg_pattern <- c("([\\d\\.]+)(kg)")
+lb_pattern <- c("([\\d\\.]+)(lb)")
+
+size_dat <- dat2 %>%
+  mutate(feet=as.numeric(gsub("\'","",stri_extract_last_regex(Species,feet_pattern))),
+         inches=as.numeric(gsub("\"","",stri_extract_last_regex(Species,inches_pattern))),
+         meters=as.numeric(gsub("m","",stri_extract_last_regex(Species,meters_pattern))),
+         cm=as.numeric(gsub("cm","",stri_extract_last_regex(Species,cm_pattern))),
+         kg=as.numeric(gsub("kg","",stri_extract_last_regex(Species,kg_pattern))),
+         lb=as.numeric(gsub("lb","",stri_extract_last_regex(Species,lb_pattern)))
+  )
+
+size_dat <- size_dat %>% 
+  mutate(feet=ifelse(!is.na(feet)&!is.na(inches),
+                       feet+(inches/12), # combine feet+inches into feet
+                     ifelse(is.na(feet)&!is.na(inches),
+                            inches/12,feet)),
+         meters=ifelse(is.na(meters)&!is.na(feet),feet*0.3048, # 1ft = 0.3048m
+                       ifelse(!is.na(cm),cm/100,meters)),
+         kg=ifelse(is.na(kg)&!is.na(lb),lb*0.453592,kg) # lb to kg ~ 1 to 0.453592
+
+  ) %>% select(-inches,-cm,-lb)
+
+#write.csv(size_dat,"shark_size.csv",row.names = FALSE,quote=FALSE)
+
+summary(size_dat$meters) #%>% kable(caption='Length Summary (meters)')
+
+summary(size_dat$kg) #%>% kable(caption='Weight Summary (kg)')
+
+```
+
+####Shark Gender
+
+```{r}
+
+gender_dat <- dat2 %>% 
+  mutate(Species=gsub("(pregnant)","female",Species),
+         gender=ifelse(grepl("(female)",Species),
+                       "female",
+                       ifelse(grepl("male",Species),
+                              "male",
+                              NA))
+         ) %>% filter(!is.na(gender))
+    
+   
+
+#write.csv(gender_dat,"shark_gender.csv",row.names = FALSE,quote=FALSE)
+gender_dat %>% group_by(gender) %>% summarize(n=n())
+
+```
+
+```{r, eval=FALSE,echo=FALSE,message=FALSE}
+
+# SCRAP THIS CODE CHUNK
+
+#dat2 <- dat %>% mutate(Species=stri_trans_tolower(stringr::str_replace_all(Species,"[\\s,`\\?\\[\\]\\(\\)]+", " ")))
+
+dat2 <- dat %>% 
+  mutate(Species=stri_trans_tolower(Species)) # Lowercase all Species text
+
+## Remove all double quotes at the beginning and end of each Species entry
+dat2 <- dat2 %>% 
+  mutate(Species=sub(pattern="^[\"]","",Species)) %>% #from beginning
+  mutate(Species=sub(pattern="([^\\d])[\"]$","\\1",Species)) #ending (unless preceded by a digit)
+
+#dat2 <- dat2 %>% 
+#  mutate(Species=gsub(pattern="[,;\\?:-\\[\\]\\(\\)&]"," ",Species)) #doesn't work
+
+dat2 <- dat2 %>% 
+  mutate(Species=gsub(pattern="([a-zA-Z])[\\.]","\\1 ",Species)) #removes word-final periods
+
+dat2 <- dat2 %>% mutate(Species=gsub(pattern="\\?+"," ",Species)) #removes question marks
+
+dat2 <- dat2 %>% mutate(Species=gsub(pattern="[,;]"," ",Species)) #removes commas & semicolons
+
+dat2 <- dat2 %>% mutate(Species=gsub(pattern="\\[|\\]"," ",Species)) #removes square brackets
+
+dat2 <- dat2 %>% mutate(Species=gsub(pattern="\\(|\\)"," ",Species)) #remove parentheses
+
+dat2 <- dat2 %>% #normalizes shark length descriptions
+  mutate(Species=gsub(pattern="(\\d)(\\s|-)(metre|m|meter|cm|ft|feet|foot)(\\s|$)","\\1\\3 ",Species)) %>%
+  mutate(Species=gsub(pattern="(\\d)(?-)(ft|feet|foot)(\\s|$)","\\1' ",Species)) %>% 
+  mutate(Species=gsub(pattern="(\\d)(?-)(meter|metre)(\\s|$)","\\1m ",Species)) 
+
+dat2 <- dat2 %>% 
+  mutate(Species=gsub(pattern="pound","lb",Species)) #normalizes pound to lb
+
+dat2 <- dat2 %>% #normalizes 'word-tipped' 'wordtipped' 'word tiped' to wordtip
+  mutate(Species=gsub(pattern="(\\w)(\\s|-)(tipped)(\\s|$|\")","\\1tip ",Species)) 
+
+## Reduce plural sharks to singular shark
+
+dat2 <- dat2 %>% # normalizes the word 'shark'
+  mutate(Species=gsub(pattern="(sharks|shar k|shar ;)","shark",Species)) %>% 
+  mutate(Species=gsub(pattern="( shar)\\s+([^k])"," shark \\2",Species)) 
+  
+
+
+dat2 <- dat2 %>% 
+  mutate(Species=gsub(pattern="(\\d)(')(shark)","\\1\\2 \\3",Species)) #spaces 5'shark to 5' shark
+
+dat2 <- dat2 %>% 
+  mutate(Species=gsub(pattern=" (\")(\\w)"," \\2",Species)) #turns "word into word
+
+dat2 <- dat2 %>% 
+  mutate(Species=gsub(pattern="(fragment|wobbegong|day)(s)","\\1",Species))
+
+dat2 <- dat2 %>% 
+  mutate(Species=gsub(pattern=" & "," and ",Species))
+
+#%>% filter(!is.na(Species)) %>% select(Species) %>% View() 
+
+#dat2 %>% filter(!is.na(Species)) %>% select(Species) %>% View() 
+
+## Reduce multiple space to a single space
+dat2 <- dat2 %>% mutate(Species=gsub(pattern="\\s+"," ",Species))
+
+
+dat2 %>% filter(!is.na(Species)) %>% select(Species) %>% View() 
+
+
+#dat2 <- dat2 %>% mutate(Species=stringr::str_replace(Species,"^[\"]",""))
+
+dat2 %>% select(Species) %>% View()
+#stri_enc_toutf8
+
+species_counts <- as.data.frame(table(dat2 %>% filter(!is.na(Species)) %>% 
+  select(Species)))
+
+species_counts %>% View()
+
+
+species_tokens <- unlist(str_split(species_counts$Var1," "))
+# Remove stopwords
+species_tokens <- gsub("(^|\\s)(a|as|by|that|but|their|from|have|an|to|or|be|later|on|was|with|and|the|<U+FFFD>|-|')($|\\s)"," ",species_tokens)
+
+#length(species_tokens)
+
+#species_tokens <- stringr::str_replace(species_tokens,"^[\"]","")
+#c("a that but their an to or and the <U+FFFD> - & '")
+species_token_counts <- as.data.frame(table(species_tokens))
+#length(species_token_counts$species_tokens[[2]]) # %>% filter(length(species_tokens)>1) %>% View()
+
+#filter stopwords...
+#stop_words_species <- unlist(str_split("a that their it but an to or and the <U+FFFD> - ' &"," "))
+#stop_words_species <- str_split(c("a that but their an to or and the <U+FFFD> - & '")," ")
+#species_token_counts <- species_token_counts %>% filter(!species_tokens%in%stop_words_species)
+#densityplot(x=species_token_counts$Freq,data=species_token_counts) + scale_y_log10()
+
+
+
+wordcloud(species_token_counts$species_tokens,
+          species_token_counts$Freq,min.freq = 9,#c(4,1),
+          random.order=FALSE, 
+          colors=brewer.pal(8, "Dark2")) #ordered.colors=TRUE,colors = TRUE)
+
+
+
+```
+
+
+##Wrangle the Activity column
+
+```{r, warning=FALSE}
+#Wrangle the activity column..
+
+#names(dat)[names(dat)=="Case Number"] <- "CaseNumber"
+
+activity_dat <- dat %>% select(`Case Number`,Activity) %>% filter(!is.na(Activity))
+
+activity_dat <- activity_dat %>% 
+  mutate(Activity=iconv(Activity,from="CP1252",to="UTF-8"),
+         Activity=stri_trans_tolower(Activity)) # Lowercase all Activity text
+
+# Remove annoying unicode characters
+activity_dat <- activity_dat %>%
+  mutate(Activity=gsub("(\u393C|\u3E33|\u613C|\u3E30|\u3E34|\u623C|\u3E64|\uFFFD)","",Activity))
+
+activity_dat <- activity_dat %>% mutate(Activity=str_trim(gsub("[\\s\"'`\\?\\(\\),;:-]+"," ",Activity,perl=TRUE))) #%>% View()
+#activity_dat$Activity <- stringr::str_replace_all(activity$Activity,"[\\s\"'`\\?\\(\\)]+", " ")
+
+activity_dat %>% group_by(Activity) %>% summarize(freq=n()) %>% arrange(desc(freq)) %>% head(20)
+
+activity_dat %>% filter(grepl("ing( |$)",Activity)) %>% 
+  group_by(Activity) %>% summarize(freq=n()) %>% arrange(desc(freq)) %>% head(20)
+
+# How deep?
+activity_dat %>% filter(grepl("deep",Activity)) %>% 
+  mutate(depth=str_extract(Activity,"([^\\s]+[\\s]){2}(deep|depth)")) %>% 
+  group_by(depth) %>% summarize(freq=n()) %>% arrange(desc(freq)) %>% head(20)
+
+
+activity_tokens <- unlist(str_split(activity_dat$Activity," "))
+num_tok <- length(activity_tokens)
+num_uniq <- length(unique(activity_tokens))
+act_word_counts <- as.data.frame(table(term=activity_tokens))
+
+act_stop_words <- c("another", "been", "a", "as", "an", "by", "of", "or", "on", "that", "his", "but", "it", "its", "their", "than", "from", "have", "out", "were", "be", "is", "was", "later", "on", "with", "and", "the")
+
+act_word_counts %>% filter(!term%in%act_stop_words) %>% head(20)
+
+
+wordcloud(act_word_counts$term,act_word_counts$Freq,
+          min.freq = 8,
+          random.order=FALSE, 
+          colors=brewer.pal(8, "Dark2"))
+
+
+```
+
+
