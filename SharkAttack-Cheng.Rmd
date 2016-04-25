@@ -99,7 +99,8 @@ address <- c("The White House, Washington, DC","The Capitol, Washington, DC")
 locations <- ldply(address, function(x) geoCode(x))
 names(locations) <- c("lat","lon","location_type", "forAddress")
 
-map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
+map("world", fill=TRUE, col="white", bg="lightblue", 
+    ylim=c(-60, 90), mar=c(0,0,0,0))
 points(as.numeric(locations$lon),as.numeric(locations$lat), 
        col="red", pch=16)
  
@@ -114,13 +115,15 @@ Let's plot the attacks in USA.
 
 ```{r}
 USA_tab <- SA_tab %>% filter(Country=="USA") %>%
-  select(Location,Area,Country) 
+  select(Location,Area,Country,Date) 
 if (any( is.na(USA_tab))) {
   USA_tab[is.na(USA_tab)] <- ""
 }
 address <- do.call(paste, c(USA_tab, sep=" "))
-locations <-  ldply(address[1:50], function(x) geoCode(x))
-loc <- locations %>% na.omit()
+
+locations <- ldply(address[1:50],
+                   function(x) geoCode(x))
+loc <- data.frame(USA_tab$Date[1:50],locations) %>% na.omit()
 
 map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
 points(as.numeric(loc$V2),as.numeric(loc$V1), col="red", pch=16)
@@ -130,8 +133,9 @@ gsub("(a+)", "z\\1z", c("abc", "def", "cba a", "aa"), perl=TRUE)
 
 ts <- c("\x93Southern Wharf\x94 South Carolina USA",
         "Bull\x92s Bay, near Charleston South Carolina USA")
-gsub("[\\p{Cc}]","",ts, perl=TRUE)
-#str_split (ts, "[\\\]x[\\d]{1,2}", perl=TRUE)
+
+iconv(ts,from="CP1252",to="UTF-8") 
+
 
 ts <- c("Bridgeport, Fairfield County Connecticut USA",
         "Avalon, Los Angeles County California USA",
@@ -153,7 +157,14 @@ https://www.nodc.noaa.gov/OC5/SELECT/dbsearch/dbsearch.html
 
 ```{r}
 source("NOAA_OISST_ncdf4.R")
-ssts = extractOISSTdaily("sst.day.mean.2014.v2.nc","daily/lsmask.oisst.v2.nc",lonW=0,lonE=70,latS=-50,latN=20,date1='2014-11-23',date2='2014-11-24')
-plotOISST(ssts,2)
+ssts = extractOISSTdaily("daily/sst.day.mean.2014.v2.nc","daily/lsmask.oisst.v2.nc",lonW=0.125,lonE=359.875,latS=-89.875,latN=89.875,date1='2014-11-23',date2='2014-11-24')
+plotOISST(ssts,1)
+```
+
+Retrieve the daily mean of sea surface temperature.
+
+```{r}
+ssts = extractOISSTdaily("daily/sst.day.mean.2015.v2.nc","daily/lsmask.oisst.v2.nc",lonW=0,lonE=359.875,latS=-89.5,latN=89.5,date1='2015-09-17',date2='2015-09-18')
+plotOISST(ssts,1)
 ```
 
