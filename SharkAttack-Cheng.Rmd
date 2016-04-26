@@ -7,6 +7,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+The influence of environmental variables on the presence of white sharks: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3712984/
+
+White sharks have been implicated in 346 unprovoked attacks on humans worldwide, of which 102 were fatal since 1839, with a steady increase in the frequency of attacks.
+
 The following data sets are provided to analyze Shark Attack.
 
 ```{r}
@@ -152,8 +156,12 @@ points(as.numeric(locations$lon),as.numeric(locations$lat),
 ## World Ocean Database
 ### Extracting NOAA sea temperatures with ncdf4
 The demo following the instruction @ http://lukemiller.org/index.php/2014/11/extracting-noaa-sea-surface-temperatures-with-ncdf4/ is coded in the R chunk as follows.
+http://www.ncdc.noaa.gov/oisst
+
 https://crudata.uea.ac.uk/cru/data/temperature/
 https://www.nodc.noaa.gov/OC5/SELECT/dbsearch/dbsearch.html
+
+Retrieve the daily mean of sea surface temperature.
 
 ```{r}
 source("NOAA_OISST_ncdf4.R")
@@ -164,7 +172,16 @@ plotOISST(ssts,1)
 Retrieve the daily mean of sea surface temperature.
 
 ```{r}
-ssts = extractOISSTdaily("daily/sst.day.mean.2015.v2.nc","daily/lsmask.oisst.v2.nc",lonW=0,lonE=359.875,latS=-89.5,latN=89.5,date1='2015-09-17',date2='2015-09-18')
+# lonW=80,lonE=110,latS=17,latN=35 has values
+ssts = extractOISSTdaily("daily/sst.day.mean.2015.v2.nc","daily/lsmask.oisst.v2.nc",lonW=80,lonE=110,latS=20,latN=35,date1='2015-09-20',date2='2015-09-21')
 plotOISST(ssts,1)
+points(98.7,29.94, col="red", pch=16)
+
+
+day <- 1
+any(!is.na(ssts[, ,day]))
+with_value <- !is.na(ssts[, ,day])
+sst2 <- ssts[, ,day]
+mean(sst2[with_value])
 ```
 
