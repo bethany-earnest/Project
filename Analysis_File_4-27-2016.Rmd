@@ -1,0 +1,165 @@
+---
+title: "Untitled"
+output: word_document
+---
+
+#Load Raw Data and Libraries
+```{r,echo=FALSE}
+options(warn=-1)
+Attacks <- read.csv("C:/Users/earnesbl/Desktop/Project/Shark_Attack_Data_4-7-2016.csv")
+
+library(pROC)
+library(randomForest)
+library(rpart)
+library(rattle)
+library(klaR)
+library(e1071)
+library(caret)
+```
+
+#Wrangle Data
+#Fix Fatal [BETH]
+```{r,echo=FALSE}
+Attacks$Fatal<-Attacks$Fatal..Y.N.
+
+Attacks$Fatal..Y.N.<-NULL
+
+table(Attacks$Fatal)
+
+Attacks<-droplevels(subset(Attacks, 
+                           #Country=="USA" &
+                           !Fatal %in% c("F", "UNKNOWN","") | 
+                             is.na(Fatal)))
+
+table(Attacks$Fatal)
+
+for(i in 1:nrow(Attacks)){
+  for(n in unique(Attacks$Fatal)){
+    Attacks[i,]$Fatal<-ifelse(Attacks[i,]$Fatal!="Y", "N", "Y") 
+  }
+}
+
+table(Attacks$Fatal)
+
+Attacks<-droplevels(Attacks)
+
+table(Attacks$Fatal)
+```
+#Fix Age [BETH]
+```{r,echo=FALSE}
+#table(Attacks$Age)
+
+Attacks$Age<-as.numeric(Attacks$Age)
+
+hist(Attacks$Age)
+```
+#Fix Month [BETH]
+```{r,echo=FALSE}
+Attacks$Clean_Date<-as.Date(Attacks$Date, format="%d-%b-%Y")
+
+Attacks$Month<-format(Attacks$Clean_Date, format="%B")
+
+table(is.na(Attacks$Month))
+
+Attacks<-droplevels(subset(Attacks, !is.na(Month)))
+
+table(is.na(Attacks$Month))
+```
+#Fix Time [BETH, OUTSTANDING] 
+```{r,echo=FALSE}
+#table(Attacks$Time)
+```
+#Fix Species [SAM, OUTSTANDING]
+#Fix Activity [SAM, OUTSTANDING]
+#Bind Beth Data, Sam Data, and Ruth Data Together and assign as data below. 
+
+#Binary Classification
+#Define Variables for Model
+```{r,echo=FALSE}
+data<-Attacks
+rm(Attacks)
+response<-'Fatal'
+explanatory<- c("Month","Type","Sex","Age")
+keep<-c(response, explanatory)
+
+#explanatory_not_ready<-c("Year","Area","Activity", "Time", "Species")
+
+#Address Missing Values
+for(i in names(data[keep])){
+  print(names(data[i]))
+  print(table(is.na(data[,i])))
+ 
+  if(class(data[,i])=="character"){
+    data[,i]<-as.factor(data[,i])
+  }
+}
+```
+#Collect Model Scores [BETH, Add Cross Validation]
+```{r,echo=FALSE}
+total_results<-NULL
+top_scores<-NULL
+results<-NULL
+
+#model 1
+  rf<-randomForest(data[,response]~., data=data[explanatory])
+  score<-auc(data[,response], as.numeric(predict(rf)))
+  loop_results<-cbind('Model'='Random Forest', 'Response'=response, 'AUC'=score)
+  results<-data.frame(rbind(loop_results, results))
+
+#model 2
+  dt<-rpart(data[,response]~., data=data[explanatory])
+  score<-auc(data[,response], as.numeric(predict(dt)[,1]))
+  loop_results<-cbind('Model'='Decision Tree', 'Response'=response, 'AUC'=score)
+  results<-data.frame(rbind(loop_results, results))
+
+#model 3
+  nb<-NaiveBayes(data[,response]~., data=data[explanatory])
+  score<-auc(data[,response], as.numeric(unlist(predict(nb)[1])))
+  loop_results<-cbind('Model'='Naive Bayes', 'Response'=response, 'AUC'=score)
+  results<-data.frame(rbind(loop_results, results))
+
+#model 4
+  sv<-svm(data[,response]~., data=data[explanatory])
+  score<-auc(data[,response], as.numeric(predict(sv)))
+  loop_results<-cbind('Model'='Support Vector Machine', 'Response'=response, 'AUC'=score)
+  results<-data.frame(rbind(loop_results, results))  
+  
+#collect results
+  total_results<-data.frame(rbind(total_results, results))
+  total_results$AUC<-as.numeric(as.character(total_results$AUC))
+  top_scores<-data.frame(rbind(top_scores, total_results[which.max(total_results$AUC),]))
+
+print(total_results[order(-total_results$AUC),])
+  
+rm(results)
+rm(loop_results)
+```
+#Model Data
+```{r,echo=FALSE}
+for(z in 1:nrow(top_scores)){
+  keep<-c(paste(top_scores[z,]$Response), explanatory)
+
+  if(top_scores[z,]$Model=="Random Forest"){
+    rf<-randomForest(data[,paste(top_scores[z,]$Response)]~., data=data[explanatory])
+    data[, paste(top_scores[z,]$Response,"_Pred", sep="")]<-predict(rf)
+    print(varImpPlot(rf))
+  }
+  else if (top_scores[z,]$Model=="Decision Tree"){
+    dt<-rpart(data[,paste(top_scores[z,]$Response)]~., data=data[explanatory])
+    data[, paste(top_scores[z,]$Response,"_Pred", sep="")]<-predict(dt)[,1]
+    print(fancyRpartPlot(dt))
+    print(dt$variable.importance)
+  }
+  else if (top_scores[z,]$Model=="Naive Bayes"){
+    nb<-NaiveBayes(data[,paste(top_scores[z,]$Response)]~., data=data[explanatory])
+    data[, paste(top_scores[z,]$Response,"_Pred", sep="")]<-predict(nb)[1]
+    print(summary(nb))
+  }
+  else if (top_scores[z,]$Model=="Support Vector Machine"){
+    sv<-svm(data[,paste(top_scores[z,]$Response)]~., data=data[explanatory])
+    data[, paste(top_scores[z,]$Response,"_Pred", sep="")]<-predict(sv)
+    print(summary(sv))
+  }
+}
+options(warn=0)
+```
