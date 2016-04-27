@@ -19,6 +19,7 @@ suppressMessages(library(readr))
 suppressMessages(library(tidyr))
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
+suppressMessages(library(lubridate))
 # attack location, how many people in the area, water realted env variables, date, time
 SAdata <- read_csv("Shark_Attack_Data_4-7-2016.csv",col_names=TRUE,n_max=5897)
 SharkSpecies <- tbl_df(read_csv("Shark_Species_Data_4-7-2016.csv"))
@@ -128,9 +129,10 @@ address <- do.call(paste, c(USA_tab, sep=" "))
 locations <- ldply(address[1:50],
                    function(x) geoCode(x))
 loc <- data.frame(USA_tab$Date[1:50],locations) %>% na.omit()
+colnames(loc) <- c("day","lat","lon","location_type","forAddress")
 
 map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
-points(as.numeric(loc$V2),as.numeric(loc$V1), col="red", pch=16)
+points(as.numeric(loc$lon),as.numeric(loc$lat), col="red", pch=20)
 
 sub("(a+)", "z\\1z", c("abc", "def", "cba a", "aa"), perl=TRUE)
 gsub("(a+)", "z\\1z", c("abc", "def", "cba a", "aa"), perl=TRUE)
@@ -183,5 +185,39 @@ any(!is.na(ssts[, ,day]))
 with_value <- !is.na(ssts[, ,day])
 sst2 <- ssts[, ,day]
 mean(sst2[with_value])
+```
+
+Apply the algorithm to the shark attack data.
+
+```{r}
+mean_temp <- function(lon,lat,day) {
+  lonarg <- c(floor(lon),ceiling(lon))
+  latarg <- c(floor(lat),ceiling(lat))
+  ssts = extractOISSTdaily("daily/sst.day.mean.2015.v2.nc",
+                   "daily/lsmask.oisst.v2.nc",
+                   lonW=lonarg[1],lonE=lonarg[2],
+                    latS=latarg[1],latN=latarg[2],
+                         date1=day)
+  while(all(is.na(ssts))) {
+    lonarg <- lonarg + c(-1,1)*5
+    latarg <- latarg + c(-1,1)*5
+    ssts = extractOISSTdaily(
+      paste0("daily/sst.day.mean.",year(day),".v2.nc"),
+                   "daily/lsmask.oisst.v2.nc",
+                   lonW=lonarg[1],lonE=lonarg[2],
+                    latS=latarg[1],latN=latarg[2],
+                         date1=day)
+  }
+  with_value <- !is.na(ssts)
+  mean(ssts[with_value])
+}
+
+loc$day <- as.Date(as.character(loc$day),format="%d-%b-%y")
+loc <- na.omit(loc)
+
+lon <- as.numeric(loc$lon)+180
+lat <- as.numeric(loc$lat)
+day <- loc$day
+loc$temp <- lapply(lon, mean_temp,lat=lat,day=day)
 ```
 
