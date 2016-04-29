@@ -1,6 +1,6 @@
 ---
 title: "Untitled"
-output: word_document
+output: html_document
 ---
 
 #Load Raw Data and Libraries

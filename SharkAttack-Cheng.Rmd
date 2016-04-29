@@ -31,12 +31,13 @@ Sharks <- read_csv("Sharks_4-7-2016.csv")
 Note that "Unprovoked attacks" are defined as incidents where an attack on a live human occurs in the shark’s natural habitat with no human provocation of the shark.
 
 ```{r}
-SA_tab <- SAdata[1:19] 
-SA_tab %>% select(`Case Number`,Date,Year,Location,Area,Country) %>% 
-  group_by(Location,Area,Country) %>% summarize(n=n()) %>% 
+SA_tab <- tbl_df(SAdata[1:19]) 
+colnames(SA_tab)[1] <- "CaseNumber"
+SA_tab %>% select(CaseNumber,Date,Year,Location,Area,Country) %>% 
+  group_by(Location,Area,Country) %>% dplyr::summarize(n=n()) %>% 
   filter(is.na(Area)) %>% View()
-SA_tab %>% group_by(Location) %>% select(`Case Number`,Date,Year,Area) %>%
-  summarize(n=n())
+SA_tab %>% group_by(Location) %>% select(CaseNumber,Date,Year,Area) %>%
+  dplyr::summarize(n=n())
 ```
 
 # include plots
@@ -120,39 +121,24 @@ Let's plot the attacks in USA.
 
 ```{r}
 USA_tab <- SA_tab %>% filter(Country=="USA") %>%
-  select(Location,Area,Country,Date) 
+  select(CaseNumber,Location,Area,Country,Date) 
+
 if (any( is.na(USA_tab))) {
   USA_tab[is.na(USA_tab)] <- ""
 }
-address <- do.call(paste, c(USA_tab, sep=" "))
+address <- do.call(paste, c(select(USA_tab,-c(CaseNumber,Date)), 
+                                   sep=" "))
+address <- iconv(address,from="CP1252",to="UTF-8")
 
-locations <- ldply(address[1:50],
+locations <- ldply(address,
                    function(x) geoCode(x))
-loc <- data.frame(USA_tab$Date[1:50],locations) %>% na.omit()
-colnames(loc) <- c("day","lat","lon","location_type","forAddress")
+loc <- data.frame(USA_tab$CaseNumber,USA_tab$Date,locations) %>%
+  na.omit()
+colnames(loc) <- c("CaseNumber","day","lat","lon","location_type",
+                   "forAddress")
 
 map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
 points(as.numeric(loc$lon),as.numeric(loc$lat), col="red", pch=20)
-
-sub("(a+)", "z\\1z", c("abc", "def", "cba a", "aa"), perl=TRUE)
-gsub("(a+)", "z\\1z", c("abc", "def", "cba a", "aa"), perl=TRUE)
-
-ts <- c("\x93Southern Wharf\x94 South Carolina USA",
-        "Bull\x92s Bay, near Charleston South Carolina USA")
-
-iconv(ts,from="CP1252",to="UTF-8") 
-
-
-ts <- c("Bridgeport, Fairfield County Connecticut USA",
-        "Avalon, Los Angeles County California USA",
-        " Hawaii USA", "Palm Beach, Palm Beach County Florida USA",
-        "Ocean City (offshore) New Jersey USA",
-        "Staten Island New York USA")
-locations <-  ldply(ts, function(x) geoCode(x))
-names(locations) <- c("lat","lon","location_type", "forAddress")
-
-points(as.numeric(locations$lon),as.numeric(locations$lat), 
-       col="red", pch=16)
 ```
 
 ## World Ocean Database
@@ -190,34 +176,53 @@ mean(sst2[with_value])
 Apply the algorithm to the shark attack data.
 
 ```{r}
-mean_temp <- function(lon,lat,day) {
-  lonarg <- c(floor(lon),ceiling(lon))
-  latarg <- c(floor(lat),ceiling(lat))
-  ssts = extractOISSTdaily("daily/sst.day.mean.2015.v2.nc",
-                   "daily/lsmask.oisst.v2.nc",
-                   lonW=lonarg[1],lonE=lonarg[2],
-                    latS=latarg[1],latN=latarg[2],
-                         date1=day)
-  while(all(is.na(ssts))) {
-    lonarg <- lonarg + c(-1,1)*5
-    latarg <- latarg + c(-1,1)*5
+mean_temp <- function(loc) {
+  lon <- as.numeric(loc[4])
+  lat <- as.numeric(loc[3])
+  day <- as.Date(loc[7])
+    lonarg <- c(floor(lon),ceiling(lon))
+    latarg <- c(floor(lat),ceiling(lat))
     ssts = extractOISSTdaily(
-      paste0("daily/sst.day.mean.",year(day),".v2.nc"),
+                paste0("daily/sst.day.mean.",year(day),".v2.nc"),
                    "daily/lsmask.oisst.v2.nc",
                    lonW=lonarg[1],lonE=lonarg[2],
                     latS=latarg[1],latN=latarg[2],
                          date1=day)
-  }
-  with_value <- !is.na(ssts)
-  mean(ssts[with_value])
+    while(all(is.na(ssts))) {
+      lonarg <- lonarg + c(-1,1)*5
+      latarg <- latarg + c(-1,1)*5
+      ssts = extractOISSTdaily(
+             paste0("daily/sst.day.mean.",year(day),".v2.nc"),
+                   "daily/lsmask.oisst.v2.nc",
+                   lonW=lonarg[1],lonE=lonarg[2],
+                    latS=latarg[1],latN=latarg[2],
+                         date1=day)
+    }
+    with_value <- !is.na(ssts)
+    mean(ssts[with_value])
 }
+# remove words after year, before date, convert to 2-digit year
+loc$day <- gsub ("([0-9]*)\\.(.*)$","\\1",loc$day)
+loc$day <- gsub("(^\\w*\\s*)\\d","1",loc$day)
+loc$day <- gsub("(.*)-(..)(..)$", "\\1-\\3", loc$day)
 
-loc$day <- as.Date(as.character(loc$day),format="%d-%b-%y")
-loc <- na.omit(loc)
+# fixing year 0-68 --> 2000-2068
+xx <- "1-Sep-68"
+d <- as.Date(xx, "%d-%b-%y")
+as.Date(ifelse(d > "2016-4-30", format(d, "19%y-%m-%d"), format(d)))
 
-lon <- as.numeric(loc$lon)+180
-lat <- as.numeric(loc$lat)
-day <- loc$day
-loc$temp <- lapply(lon, mean_temp,lat=lat,day=day)
+loc <- loc %>% mutate(cleanDate=as.Date(day,format="%d-%b-%y")) %>%
+  mutate(cleanDate=as.Date(ifelse(cleanDate > "2016-4-30",
+                                  format(cleanDate, "19%y-%m-%d"),
+                                  format(cleanDate)))) %>% 
+  na.omit(loc) %>% filter(year(cleanDate) >= 1981) %>% 
+  arrange(cleanDate)
+
+loc$lon <- as.numeric(loc$lon)+180
+loc$lat <- as.numeric(loc$lat)
+
+loc$temp <- apply(loc,1,mean_temp)
+
+SA_tab %>% left_join(loc) %>% write_csv("USA_LocTemp.csv")
 ```
 

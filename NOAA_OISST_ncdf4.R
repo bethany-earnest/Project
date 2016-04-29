@@ -202,7 +202,8 @@ extractOISSTdaily = function(fname,lsmask,lonW,lonE,latS,latN, date1, date2){
     temp = temp[nrow(temp):1,] # reverse row order to reverse latitudes
     sst2[,,i] = temp # write data to sst2 array
   }	
-  
+  nc_close(nc)
+  nc_close(nc2)
   ##########################
   sst2 # return sst2 array
   ##########################
