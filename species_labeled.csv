@@ -113,7 +113,7 @@ CaseNumber,species_cat
 2015.01.17,NA
 2015.01.16,NA
 2015.01.08,no shark
-2015.01.06,oceanic white
+2015.01.06,white
 2015.01.03,raggedtooth
 2015.01.01,NA
 2014.12.29.a,white
@@ -794,7 +794,7 @@ CaseNumber,species_cat
 2005.07.13,NA
 2005.06.27,bull
 2005.06.25,bull
-2005.06.22,lb
+2005.06.22,NA
 2005.06.16,NA
 2005.06.13,white
 2005.06.05,white
@@ -1445,7 +1445,7 @@ CaseNumber,species_cat
 1991.10.05,white
 1991.09.19,tiger
 1991.09.08,white
-1991.08.30,lb
+1991.08.30,NA
 1991.08.26,sand
 1991.08.12,NA
 1991.08.09,lemon
@@ -1502,7 +1502,7 @@ CaseNumber,species_cat
 1989.10.08,tiger
 1989.10.01,white
 1989.09.17,white
-1989.09.13,lb
+1989.09.13,NA
 1989.09.10,white
 1989.09.09.b,white
 1989.09.09.a,sandbar
@@ -1620,7 +1620,7 @@ CaseNumber,species_cat
 1985.10.22,sevengill
 1985.10.18,tiger
 1985.10.12,NA
-1985.10.05,lb
+1985.10.05,NA
 1985.09.28,white
 1985.09.08.a,silky
 1985.08.20,NA
@@ -1630,7 +1630,7 @@ CaseNumber,species_cat
 1985.07.19,tiger
 1985.07.00,white
 1985.05.26,NA
-1985.05.08,lb
+1985.05.08,NA
 1985.03.03,white
 1985.02.18,white
 1985.01.27,raggedtooth
@@ -1820,7 +1820,7 @@ CaseNumber,species_cat
 1976.06.02.R,blue
 1976.06.01,NA
 1976.05.02,mako
-1976.04.28,lb
+1976.04.28,NA
 1976.03.12.a,whale
 1976.03.09,white
 1976.03.02,white
@@ -2043,12 +2043,12 @@ CaseNumber,species_cat
 1965.11.21.b,NA
 1965.11.03.b,NA
 1965.11.03.a,gray nurse
-1965.10.16.b,lb
-1965.10.16.a,lb
+1965.10.16.b,NA
+1965.10.16.a,NA
 1965.10.10,NA
 1965.09.21,NA
 1965.09.12,NA
-1965.09.08,lb
+1965.09.08,NA
 1965.08.30,NA
 1965.07.30,lemon
 1965.04.29,bull
@@ -2056,7 +2056,7 @@ CaseNumber,species_cat
 1965.04.04.b,tiger
 1965.04.04.a,spinner
 1965.03.14,mako
-1965.02.14,lb
+1965.02.14,NA
 1965.02.04,NA
 1965.01.23,white
 1965.01.10,NA
@@ -2102,7 +2102,7 @@ CaseNumber,species_cat
 1964.01.00,white
 1963.12.29,zambesi
 1963.12.26.b,NA
-1963.12.26.a,lb
+1963.12.26.a,NA
 1963.12.22.b,NA
 1963.12.22.a,dusky
 1963.12.21,wobbegong
@@ -2117,7 +2117,7 @@ CaseNumber,species_cat
 1963.11.12,silky
 1963.11.05.R,NA
 1963.11.04,NA
-1963.10.16,lb
+1963.10.16,NA
 1963.09.29,white
 1963.09.26,dusky
 1963.09.22,NA
@@ -2136,7 +2136,7 @@ CaseNumber,species_cat
 1963.02.24,bronze whaler
 1963.02.08,white
 1963.01.28,bull
-1963.01.22,lb
+1963.01.22,NA
 1963.01.14,gray nurse
 1963.01.12,NA
 1963.01.11,NA
@@ -2145,7 +2145,7 @@ CaseNumber,species_cat
 1963.01.00,zambesi
 1962.12.30,dusky
 1962.12.09,white
-1962.12.00,lb
+1962.12.00,NA
 1962.11.29,NA
 1962.11.11,white
 1962.11.10,NA
@@ -2260,7 +2260,7 @@ CaseNumber,species_cat
 1960.10.24,white
 1960.10.02,NA
 1960.10.00.b,white
-1960.09.24,lb
+1960.09.24,NA
 1960.09.18,NA
 1960.09.02,gray reef
 1960.09.01,gray reef
@@ -2370,7 +2370,7 @@ CaseNumber,species_cat
 1958.11.14,NA
 1958.11.05,white
 1958.09.13,blue
-1958.09.06,lb
+1958.09.06,NA
 1958.08.31,hammerhead
 1958.08.01,NA
 1958.07.27.b,tiger
@@ -2389,7 +2389,7 @@ CaseNumber,species_cat
 1958.04.03,NA
 1958.02.01,nurse
 1958.01.19,NA
-1958.01.09.R,lb
+1958.01.09.R,NA
 1958.01.09,white
 1958.00.00.j,NA
 1958.00.00.h,NA
@@ -2429,7 +2429,7 @@ CaseNumber,species_cat
 1956.08.15.a,white
 1956.08.00.c,porbeagle white
 1956.08.00.a,NA
-1956.07.26,lb
+1956.07.26,NA
 1956.07.20,white
 1956.06.28,NA
 1956.05.26.R,white
@@ -2504,7 +2504,7 @@ CaseNumber,species_cat
 1952.12.03,NA
 1952.08.06,zambesi
 1952.08.05,NA
-1952.08.04,lb
+1952.08.04,NA
 1952.07.27.d,hammerhead
 1952.07.27.c,NA
 1952.07.27.b,NA
@@ -2526,7 +2526,7 @@ CaseNumber,species_cat
 1951.07.11,NA
 1951.03.26,wobbegong
 1951.03.24,NA
-1951.02.19,lb
+1951.02.19,NA
 1951.02.01,NA
 1950.12.31,nurse
 1950.12.19.R,wobbegong
@@ -2535,7 +2535,7 @@ CaseNumber,species_cat
 1950.11.12,NA
 1950.10.08,white
 1950.10.04,NA
-1950.08.06,lb
+1950.08.06,NA
 1950.07.27.R,white
 1950.07.10,hammerhead
 1950.07.00,NA
@@ -2615,7 +2615,7 @@ CaseNumber,species_cat
 1942.09.12.a,tiger
 1942.09.11,tiger
 1942.07.06,porbeagle
-1942.06.08.R,lb
+1942.06.08.R,NA
 1942.01.04,bull
 1942.01.00,NA
 1942.00.00.g,NA
@@ -2625,7 +2625,7 @@ CaseNumber,species_cat
 1941.11.27.b,tiger
 1941.11.27.a,tiger
 1941.07.22,mako
-1941.07.01,lb
+1941.07.01,NA
 1941.06.15,NA
 1941.03.09,mako
 1940.09.00,NA
@@ -2669,7 +2669,7 @@ CaseNumber,species_cat
 1937.08.31,tiger
 1937.06.15.b,whaler
 1937.05.30,NA
-1937.05.15,lb
+1937.05.15,NA
 1937.02.13,white
 1937.02.03,bluenose
 1937.02.02,NA
@@ -2684,7 +2684,7 @@ CaseNumber,species_cat
 1936.07.12,blue
 1936.06.26,tiger
 1936.04.22,tiger
-1936.03.30,lb
+1936.03.30,NA
 1936.02.20..R,NA
 1936.02.04,white
 1936.01.22,white
@@ -2728,7 +2728,7 @@ CaseNumber,species_cat
 1933.02.15.R,NA
 1933.02.12,blue
 1932.10.31,gray nurse
-1932.08.10,lb
+1932.08.10,NA
 1932.07.14.R,NA
 1932.07.02,white
 1932.06.28,catshark
@@ -2738,7 +2738,7 @@ CaseNumber,species_cat
 1931.11.26,NA
 1931.09.21.a,hammerhead
 1931.09.02,NA
-1931.08.30,lb
+1931.08.30,NA
 1931.07.28.R,NA
 1931.06.13,tiger
 1931.06.04.R,NA
@@ -2812,7 +2812,7 @@ CaseNumber,species_cat
 1920.11.22,catshark
 1920.11.29,NA
 1920.06.27,NA
-1919.04.06,lb
+1919.04.06,NA
 1919.01.17,NA
 1919.01.09,NA
 1900.00.00.R,NA
@@ -2937,7 +2937,7 @@ CaseNumber,species_cat
 1862.07.13,NA
 1860.04.00.a,ground
 1860.03.11,NA
-1854.04.08.R,lb
+1854.04.08.R,NA
 1853.09.28,white
 1853.07.13.R,tiger
 1853.00.00.c,white
