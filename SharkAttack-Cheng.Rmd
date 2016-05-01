@@ -124,44 +124,77 @@ world_tab <- SA_tab %>% select(CaseNumber,Location,Area,Country,Date) %>% na.omi
 address <- do.call(paste, c(select(world_tab,-c(CaseNumber,Date)), sep=" ")) %>%
               iconv(from="CP1252",to="UTF-8")
 
+# run and then save the result
+# infile <- "world_lon-lat_SAdata.rds"
+# locations <- sapply(address,geocode)
+# saveRDS(locations, infile)
 
+infile <- "world_lon-lat_SAdata-1to2532.rds"
+read_loc <- t(readRDS(infile))
+read_df <- data.frame(world_tab$CaseNumber,matrix(unlist(read_loc),
+                                                  nrow=dim(read_loc)[1]))
+names(read_df) <- c("CaseNumber","lon","lat")
 
+infile <- "world_lon-lat_SAdata-2533to5032.rds"
+read_loc <- t(readRDS(infile))
+read_df[2533:5217,2:3] <-data.frame(matrix(unlist(read_loc),nrow=dim(read_loc)[1]))
 
+# Fixed the following locations manually
+Inland <- SA_tab %>% filter(Area=="Guam")
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <- c(144.76,13.48)
+# one incident inland is Albuquerque aquarium, Albuquerque, NM
+# 6 incidents inland are California, CA
+# one incident occurred in Destin, Okaloosa County, FL
+Inland <- SA_tab[grep("Destin",SA_tab$Location),]
+read_df[which(read_df$CaseNumber %in% Inland$CaseNumber)[1],2:3] <- c(-86.5,30.39)
+# one incident in 15 miles south of Jones Inlet, which is actually in Long Island
+Inland <- SA_tab[grep("Jones Inlet",SA_tab$Location),]
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <- c(-73.13,40.79)
+# one incident in Sandbridge beach, VA
+Inland <- SA_tab[grep("Sandbridge Beach",SA_tab$Location),]
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <- c(-75.94,36.72)
+# one incident in Gun Beach, Guam
+Inland <- SA_tab[grep("Gun Beach",SA_tab$Location),]
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <- c(144.8,13.52)
+# one incident in Short sand beach
+Inland <- SA_tab[grep("Short Sand Beach",SA_tab$Location),]
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <- c(-123.87,45.76)
+# one incident in Catalina Island, CA
+Inland <- SA_tab[grep("West Cove, Catalina Island",SA_tab$Location),]
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <- c(-118.42,33.39)
+# one incident in 24 km off Santa Catalina Island in the Channel Islands
+Inland <- SA_tab[grep("24 km off Santa Catalina Island",
+                      SA_tab$Location),]
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
+  c(-118.42,33.3833)
 
+# plot world map
+map("world", fill=TRUE, col="white", bg="lightblue", 
+    ylim=c(-60, 90), mar=c(0,0,0,0))
+read_df <- read_df %>% na.omit() 
+points(read_df$lon,read_df$lat, col="red", pch=16)
 
-
-
-locations <- sapply(address,geocode)
-saveRDS(locations, infile)
-
-loc <- t(locations) 
-df <- data.frame(world_tab$CaseNumber,matrix(unlist(loc),nrow=dim(loc)[1]))
-names(loc) <- c("address","lat","lon")
-
+# old approach - seems not working
 #locations <- ldply(address,
 #                   function(x) geoCode(x))
-loc <- data.frame(world_tab$CaseNumber,world_tab$Date,t(locations)) %>%
-  na.omit()
-colnames(loc) <- c("CaseNumber","day","lat","lon","location_type",
-                   "forAddress")
+# loc <- data.frame(world_tab$CaseNumber,world_tab$Date,t(locations)) %>%
+#  na.omit()
+#colnames(loc) <- c("CaseNumber","day","lat","lon","location_type",
+#                   "forAddress")
 
-map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
-points(as.numeric(loc$lon),as.numeric(loc$lat), col="red", pch=20)
-
-SA_tab %>% left_join(loc) %>% write_csv("world_lon-lat_SAdata.csv")
+#map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
+#points(as.numeric(loc$lon),as.numeric(loc$lat), col="red", pch=20)
 ```
 
 
 Let's plot the attacks in USA.
 
 ```{r}
-USA_tab <- SA_tab %>% filter(Country=="USA") %>% left_join(loc)
+USA_tab <- SA_tab %>% filter(Country=="USA") %>% left_join(read_df) %>% na.omit()
 
-loc <- USA_tab %>% select(CaseNumber,day,lat,lon)
-
-map("world", fill=TRUE, col="white", bg="lightblue", xlim=c(-130,80),
+map("world", fill=TRUE, col="white", bg="lightblue", xlim=c(-130,-60),
     ylim=c(20, 50), mar=c(0,0,0,0))
-points(as.numeric(loc$lon),as.numeric(loc$lat), col="red", pch=20)
+points(USA_tab$lon,USA_tab$lat, col="red", pch=20)
 ```
 
 ## World Ocean Database
@@ -200,9 +233,9 @@ Apply the algorithm to the shark attack data.
 
 ```{r}
 mean_temp <- function(loc) {
-  lon <- as.numeric(loc[4])
+  lon <- as.numeric(loc[2])
   lat <- as.numeric(loc[3])
-  day <- as.Date(loc[7])
+  day <- as.Date(loc[1])
     lonarg <- c(floor(lon),ceiling(lon))
     latarg <- c(floor(lat),ceiling(lat))
     ssts = extractOISSTdaily(
@@ -225,27 +258,22 @@ mean_temp <- function(loc) {
     mean(ssts[with_value])
 }
 # remove words after year, before date, convert to 2-digit year
-loc$day <- gsub ("([0-9]*)\\.(.*)$","\\1",loc$day)
-loc$day <- gsub("(^\\w*\\s*)\\d","1",loc$day)
-loc$day <- gsub("(.*)-(..)(..)$", "\\1-\\3", loc$day)
+USA_tab$Date<- gsub ("([0-9]*)\\.(.*)$","\\1",USA_tab$Date)
+USA_tab$Date <- gsub("(^\\w*\\s*)\\d","1",USA_tab$Date)
+USA_tab$Date <- gsub("(.*)-(..)(..)$", "\\1-\\3", USA_tab$Date)
 
 # fixing year 0-68 --> 2000-2068
-xx <- "1-Sep-68"
-d <- as.Date(xx, "%d-%b-%y")
-as.Date(ifelse(d > "2016-4-30", format(d, "19%y-%m-%d"), format(d)))
-
-loc <- loc %>% mutate(cleanDate=as.Date(day,format="%d-%b-%y")) %>%
+loc <- USA_tab %>% mutate(cleanDate=as.Date(Date,format="%d-%b-%y")) %>%
   mutate(cleanDate=as.Date(ifelse(cleanDate > "2016-4-30",
                                   format(cleanDate, "19%y-%m-%d"),
                                   format(cleanDate)))) %>% 
-  na.omit(loc) %>% filter(year(cleanDate) >= 1981) %>% 
-  arrange(cleanDate)
+  na.omit() %>% filter(year(cleanDate) >= 1981) %>% 
+  arrange(cleanDate) %>% select(cleanDate,lon,lat,CaseNumber)
 
-loc$lon <- as.numeric(loc$lon)+180
-loc$lat <- as.numeric(loc$lat)
+loc$lon <- loc$lon+180
+loc$lat <- loc$lat
 
 loc$temp <- apply(loc,1,mean_temp)
-
-SA_tab %>% left_join(loc) %>% write_csv("USA_LocTemp.csv")
+write_csv(loc, "USA_LocTemp.csv")
 ```
 
