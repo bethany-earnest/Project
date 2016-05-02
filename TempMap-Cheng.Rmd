@@ -43,17 +43,18 @@ SA_tab %>% group_by(Location) %>% select(CaseNumber,Date,Year,Area) %>%
 
 # include plots
 
-```{r worldmap}
+```{r worldmap, echo=FALSE}
 library("ggmap")
 library(maptools)
 library(maps)
-visited <- c("SFO", "Chennai", "London", "Melbourne")
-ll.visited <- geocode(visited)
-visit.x <- ll.visited$lon
-visit.y <- ll.visited$lat
+# A test case
+# visited <- c("SFO", "Chennai", "London", "Melbourne")
+# ll.visited <- geocode(visited)
+# visit.x <- ll.visited$lon
+# visit.y <- ll.visited$lat
 #USING MAPS
-map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
-points(visit.x,visit.y, col="red", pch=16)
+# map("world", fill=TRUE, col="white", bg="lightblue", ylim=c(-60, 90), mar=c(0,0,0,0))
+# points(visit.x,visit.y, col="red", pch=16)
 ```
 
 A section of geocoding code.
@@ -91,24 +92,24 @@ geoCode <- function(address,verbose=FALSE) {
 
 Let's try a record of shark attack data.
 
-```{r}
+```{r, echo=FALSE}
 ##Test with a single address
-address <- geoCode("The White House, Washington, DC")
-address
+#address <- geoCode("The White House, Washington, DC")
+#address
 #[1] "38.8976831"  lat
 #[2] "-77.0364972" lon
 #[3] "APPROXIMATE"
 #[4] "The White House, 1600 Pennsylvania Avenue Northwest, Washington, D.C., DC 20500, USA"
  
 # Use plyr to getgeocoding for a vector
-address <- c("The White House, Washington, DC","The Capitol, Washington, DC")
-locations <- ldply(address, function(x) geoCode(x))
-names(locations) <- c("lat","lon","location_type", "forAddress")
+#address <- c("The White House, Washington, DC","The Capitol, Washington, DC")
+#locations <- ldply(address, function(x) geoCode(x))
+#names(locations) <- c("lat","lon","location_type", "forAddress")
 
-map("world", fill=TRUE, col="white", bg="lightblue", 
-    ylim=c(-60, 90), mar=c(0,0,0,0))
-points(as.numeric(locations$lon),as.numeric(locations$lat), 
-       col="red", pch=16)
+#map("world", fill=TRUE, col="white", bg="lightblue", 
+#    ylim=c(-60, 90), mar=c(0,0,0,0))
+#points(as.numeric(locations$lon),as.numeric(locations$lat), 
+#       col="red", pch=16)
  
 #Location type, for more info check here: https://developers.google.com/maps/documentation/directions/
 #"ROOFTOP" indicates that the returned result is a precise geocode for which we have location information accurate down to street address precision.
@@ -124,11 +125,12 @@ world_tab <- SA_tab %>% select(CaseNumber,Location,Area,Country,Date) %>% na.omi
 address <- do.call(paste, c(select(world_tab,-c(CaseNumber,Date)), sep=" ")) %>%
               iconv(from="CP1252",to="UTF-8")
 
-# run and then save the result
-# infile <- "world_lon-lat_SAdata.rds"
-# locations <- sapply(address,geocode)
-# saveRDS(locations, infile)
+# run and then save the result---there are 2500 queries limitation per day
+#infile <- "world_lon-lat_SAdata-5033to5217.rds"
+#locations <- sapply(address[5033:5217],geocode)
+#saveRDS(locations, infile)
 
+# read in (lon,lat) from three .rds files
 infile <- "world_lon-lat_SAdata-1to2532.rds"
 read_loc <- t(readRDS(infile))
 read_df <- data.frame(world_tab$CaseNumber,matrix(unlist(read_loc),
@@ -138,6 +140,10 @@ names(read_df) <- c("CaseNumber","lon","lat")
 infile <- "world_lon-lat_SAdata-2533to5032.rds"
 read_loc <- t(readRDS(infile))
 read_df[2533:5217,2:3] <-data.frame(matrix(unlist(read_loc),nrow=dim(read_loc)[1]))
+
+infile <- "world_lon-lat_SAdata-5033to5217.rds"
+read_loc <- t(readRDS(infile))
+read_df[5033:5217,2:3] <-data.frame(matrix(unlist(read_loc),nrow=dim(read_loc)[1]))
 
 # Fixed the following locations manually
 Inland <- SA_tab %>% filter(Area=="Guam")
@@ -149,7 +155,8 @@ Inland <- SA_tab[grep("Destin",SA_tab$Location),]
 read_df[which(read_df$CaseNumber %in% Inland$CaseNumber)[1],2:3] <- c(-86.5,30.39)
 # one incident in 15 miles south of Jones Inlet, which is actually in Long Island
 Inland <- SA_tab[grep("Jones Inlet",SA_tab$Location),]
-read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <- c(-73.13,40.79)
+read_df$lon[which(read_df$CaseNumber%in%Inland$CaseNumber)] <- -73.13
+read_df$lat[which(read_df$CaseNumber%in%Inland$CaseNumber)] <- 40.79
 # one incident in Sandbridge beach, VA
 Inland <- SA_tab[grep("Sandbridge Beach",SA_tab$Location),]
 read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <- c(-75.94,36.72)
@@ -167,6 +174,61 @@ Inland <- SA_tab[grep("24 km off Santa Catalina Island",
                       SA_tab$Location),]
 read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
   c(-118.42,33.3833)
+# one incident in Hanalei Bay, FL actually in St. George Island
+Inland <- SA_tab[grep("Hanalei Bay",
+                      SA_tab$Location),] %>% filter(Area=="Florida")
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
+  c(-84.88,29.66)
+# one incident in A quarter mile north of Fort Pierce Inlet Florida
+Inland <- SA_tab[grep("A quarter mile north of Fort Pierce Inlet",
+                      SA_tab$Location),] 
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
+  c(-80.3164,27.5317)
+# one incident in Curlew Island, Breton Sound, LA
+Inland <- SA_tab[grep("Curlew Island, Breton Sound",
+                      SA_tab$Location),] 
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
+  c(-88.9686,29.6466)
+# one incident in Midnight Lump, LA
+Inland <- SA_tab[grep("Midnight Lump",
+                      SA_tab$Location),] 
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
+  c(-89.3341,28.3825)
+# Dog Patch, San Onofre, CA is actually San Onofre State Beach
+Inland <- SA_tab[grep("Dog Patch, San Onofre",
+                      SA_tab$Location),] 
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
+  c(-117.5731,33.3811)
+# Bird Rock, Tomales Point, CA 
+Inland <- SA_tab[grep("Bird Rock, Tomales Point",
+                      SA_tab$Location),] %>% filter(Year==1996)
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
+  c(-122.9944,38.23)
+# Ano Nuevo State Reserve, Davenport County, CA
+Inland <- SA_tab[grep("Ano Nuevo State Reserve, Davenport County",
+                      SA_tab$Location),] 
+read_df[which(read_df$CaseNumber%in%Inland$CaseNumber),2:3] <-
+  c(-122.3066,37.1188)
+# Southeast Farallon Island, Farallon Islands, CA is actually San Onofre State Beach
+Inland <- SA_tab[grep("Southeast Farallon Island",
+                      SA_tab$Location),] 
+read_df$lon[which(read_df$CaseNumber%in%Inland$CaseNumber)] <- -123.0034
+read_df$lat[which(read_df$CaseNumber%in%Inland$CaseNumber)] <- 37.69891
+# Monastery Beach, Carmel River State Park, Monterey Peninsula, Monterey, CA 
+Inland <- SA_tab[grep("Monastery Beach, Carmel River State Park",
+                      SA_tab$Location),] 
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
+  c(-121.9268,36.5236)
+# North Farallon Island, Farallon Islands, CA 
+Inland <- SA_tab[grep("North Farallon Island, Farallon Islands",
+                      SA_tab$Location),] 
+read_df[which(read_df$CaseNumber==Inland$CaseNumber),2:3] <-
+  c(-123.09912,37.7676)
+# Klamath River, Del Norte County, CA is actually the Klamath River mouth around Requa
+Inland <- SA_tab[grep("Klamath River, Del Norte County",
+                      SA_tab$Location),] 
+read_df$lon[which(read_df$CaseNumber %in% Inland$CaseNumber)] <- -124.0653
+read_df$lat[which(read_df$CaseNumber %in% Inland$CaseNumber)] <- 41.5469
 
 # plot world map
 map("world", fill=TRUE, col="white", bg="lightblue", 
@@ -186,8 +248,7 @@ points(read_df$lon,read_df$lat, col="red", pch=16)
 #points(as.numeric(loc$lon),as.numeric(loc$lat), col="red", pch=20)
 ```
 
-
-Let's plot the attacks in USA.
+Let's plot the shark attacks in USA.  Note that the one far inland was the incident at Alberquerqy aquarium in New Mexicao.
 
 ```{r}
 USA_tab <- SA_tab %>% filter(Country=="USA") %>% left_join(read_df) %>% na.omit()
@@ -197,30 +258,49 @@ map("world", fill=TRUE, col="white", bg="lightblue", xlim=c(-130,-60),
 points(USA_tab$lon,USA_tab$lat, col="red", pch=20)
 ```
 
+A summary table listing number of shark attacks ocurred in each state.
+
+```{r}
+library(sp)
+library(rgdal)
+
+#lat and long
+coords <- USA_tab %>% select(lon,lat) %>% as.matrix()
+points <- SpatialPoints(coords)
+
+#SpatialPolygonDataFrame - I'm using a shapefile of USA
+usa.states <- readOGR(dsn="states_21basic", layer="states")
+
+#my_state <- usa.states[usa.states$STATE_NAME == "Texas", ]
+#plot(my_state)
+
+#assume same proj as shapefile!
+proj4string(points) <- proj4string(usa.states)
+#get county polygon point is in
+result <- as.character(over(points, usa.states)$STATE_NAME)
+table(result)
+```
+
 ## World Ocean Database
 ### Extracting NOAA sea temperatures with ncdf4
 The demo following the instruction @ http://lukemiller.org/index.php/2014/11/extracting-noaa-sea-surface-temperatures-with-ncdf4/ is coded in the R chunk as follows.
-http://www.ncdc.noaa.gov/oisst
-
-https://crudata.uea.ac.uk/cru/data/temperature/
-https://www.nodc.noaa.gov/OC5/SELECT/dbsearch/dbsearch.html
+Data can be downloaded at http://www.ncdc.noaa.gov/oisst.
 
 Retrieve the daily mean of sea surface temperature.
 
-```{r}
+```{r, echo=FALSE}
 source("NOAA_OISST_ncdf4.R")
-ssts = extractOISSTdaily("daily/sst.day.mean.2014.v2.nc","daily/lsmask.oisst.v2.nc",lonW=0.125,lonE=359.875,latS=-89.875,latN=89.875,date1='2014-11-23',date2='2014-11-24')
-plotOISST(ssts,1)
+#ssts = extractOISSTdaily("daily/sst.day.mean.2014.v2.nc","daily/lsmask.oisst.v2.nc",lonW=0.125,lonE=359.875,latS=-89.875,latN=89.875,date1='2014-11-23',date2='2014-11-24')
+#plotOISST(ssts,1)
 ```
 
 Retrieve the daily mean of sea surface temperature.
 
-```{r}
-# lonW=80,lonE=110,latS=17,latN=35 has values
+```{r, echo=FALSE}
+# lonW=80,lonE=110,latS=17,latN=35 has values -- A test case
 ssts = extractOISSTdaily("daily/sst.day.mean.2015.v2.nc","daily/lsmask.oisst.v2.nc",lonW=80,lonE=110,latS=20,latN=35,date1='2015-09-20',date2='2015-09-21')
 plotOISST(ssts,1)
 points(98.7,29.94, col="red", pch=16)
-
 
 day <- 1
 any(!is.na(ssts[, ,day]))
@@ -231,7 +311,7 @@ mean(sst2[with_value])
 
 Apply the algorithm to the shark attack data.
 
-```{r}
+```{r }
 mean_temp <- function(loc) {
   lon <- as.numeric(loc[2])
   lat <- as.numeric(loc[3])

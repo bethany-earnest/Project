@@ -88,7 +88,7 @@ extractOISSTdaily = function(fname,lsmask,lonW,lonE,latS,latN, date1, date2){
     lonE = lonW
 #    lonEindx = lon1indx  could be a bug
     lonEindx = lonWindx
-    cat("Only 1 longitude specified\n")
+#    cat("Only 1 longitude specified\n")
   } else {
     # Get index of nearest longitude value to lonE
     lonEindx = which.min(abs(lonE - lons)) 	
@@ -98,7 +98,7 @@ extractOISSTdaily = function(fname,lsmask,lonW,lonE,latS,latN, date1, date2){
     # If latN is not specified, reuse latS
     latN = latS
     latNindx = latSindx
-    cat("Only 1 latitude specified\n")
+#    cat("Only 1 latitude specified\n")
   } else {
     # Get index of nearest latitude value to latN
     latNindx = which.min(abs(latN - lats)) 	
@@ -124,7 +124,7 @@ extractOISSTdaily = function(fname,lsmask,lonW,lonE,latS,latN, date1, date2){
   if (missing(date2)) {
     # If date2 isn't specified, reuse date1
     date2indx = which.min(abs(date1 - ncdates)) 
-    cat('Only 1 date specified\n')
+#    cat('Only 1 date specified\n')
   } else {
     if (class(date2) == 'Date'){
       # If date2 exists, get index of nearest time point to date2
@@ -306,7 +306,7 @@ extractOISSTweekly = function(fname,lsmask,lonW,lonE,latS,latN, date1, date2){
   if (missing(date2)) {
     # If date2 isn't specified, reuse date1
     date2indx = which.min(abs(date1 - ncdates)) 
-    cat('Only 1 date specified\n')
+    # cat('Only 1 date specified\n')
   } else {
     if (class(date2) == 'Date'){
       # If date2 exists, get index of nearest time point to date2
