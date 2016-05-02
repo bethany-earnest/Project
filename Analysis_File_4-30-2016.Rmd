@@ -1,0 +1,332 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+#Individual Scoring Functions
+#score_rf
+```{r, echo=FALSE}
+RF_Score<-function(data, response, explanatory){
+  library(pROC)
+  library(hydroGOF)
+  library(randomForest)
+  
+  set.seed(0)
+  
+  results<-NULL
+  
+  rf<-randomForest(as.factor(data[,response])~., data=data[explanatory])
+  score<-auc(data[,response], as.numeric(predict(rf)))
+  loop_results<-cbind('Model'='Random Forest', 'Response'=response, 'Explanatory'=list(explanatory), 'Score_Type'='AUC', 'Score'=score)
+    
+  results<-data.frame(rbind(loop_results, results))
+  
+  return(results)
+}
+```
+#score_dt
+```{r, echo=FALSE}
+DT_Score<-function(data, response, explanatory){
+  library(pROC)
+  library(hydroGOF)
+  library(rpart)
+  
+  set.seed(0)
+  
+  results<-NULL
+  
+  dt<-rpart(as.factor(data[,response])~., data=data[explanatory])
+  score<-auc(data[,response], as.numeric(predict(dt)[,1]))
+  loop_results<-cbind('Model'='Decision Tree', 'Response'=response, 'Explanatory'=list(explanatory), 'Score_Type'='AUC', 'Score'=score)
+
+  results<-data.frame(rbind(loop_results, results))
+  
+  return(results)
+}
+```
+#score_nb
+```{r, echo=FALSE}
+NB_Score<-function(data, response, explanatory){
+  library(pROC)
+  library(hydroGOF)
+  library(klaR)
+  
+  set.seed(0)
+  
+  results<-NULL
+  
+  nb<-NaiveBayes(as.factor(data[,response])~., data=data[explanatory])
+  score<-auc(data[,response], as.numeric(unlist(predict(nb)[1])))
+  loop_results<-cbind('Model'='Naive Bayes', 'Response'=response, 'Explanatory'=list(explanatory), 'Score_Type'='AUC', 'Score'=score)
+    
+  results<-data.frame(rbind(loop_results, results))
+  
+  return(results)
+}
+```
+#score_sv
+```{r, echo=FALSE}
+SV_Score<-function(data, response, explanatory){
+  library(pROC)
+  library(hydroGOF)
+  library(e1071)
+  
+  set.seed(0)
+  
+  results<-NULL
+  
+  sv<-svm(as.factor(data[,response])~., data=data[explanatory])
+  score<-auc(data[,response], as.numeric(predict(sv)))
+  loop_results<-cbind('Model'='Support Vector Machine', 'Response'=response, 'Explanatory'=list(explanatory), 'Score_Type'='AUC', 'Score'=score)
+  
+  results<-data.frame(rbind(loop_results, results))
+  
+  return(results)
+}
+```
+#Combined Scoring Functions
+```{r, echo=FALSE}
+Scoring_Results<-function(data, response, explanatory){
+  total_results<-NULL
+  top_scores<-NULL
+  
+  total_results<-data.frame(rbind(RF_Score(data, response, explanatory),  DT_Score(data, response, explanatory),  NB_Score(data, response, explanatory),  SV_Score(data, response, explanatory)))
+  
+  total_results$Score<-as.numeric(as.character(total_results$Score))
+  type<-unique(total_results$Score_Type)
+
+  total_results[order(-total_results$Score),]
+
+  return(total_results)
+}
+```
+#Individual Prediction Functions
+#predict_rf
+```{r, echo=FALSE}
+RF_Predict<-function(data, response, explanatory){
+  rf<-randomForest(as.factor(data[,response])~., data=data[explanatory])
+  data[, paste(response,"_Pred", sep="")]<-predict(rf)
+}
+```
+#predict_dt
+```{r, echo=FALSE}
+DT_Predict<-function(data, response, explanatory){
+  dt<-rpart(as.factor(data[,response])~., data=data[explanatory])  
+  data[, paste(response,"_Pred", sep="")]<-predict(dt)
+}
+```
+#predict_nb
+```{r, echo=FALSE}
+NB_Predict<-function(data, response, explanatory){
+  nb<-NaiveBayes(as.factor(data[,response])~., data=data[explanatory])
+  data[, paste(response,"_Pred", sep="")]<-predict(nb)  
+}
+```
+#predict_sv
+```{r, echo=FALSE}
+SV_Predict<-function(data, response, explanatory){
+  sv<-svm(as.factor(data[,response])~., data=data[explanatory])
+  data[, paste(response,"_Pred", sep="")]<-predict(sv)  
+}
+```
+#Combined Prediction Functions
+```{r, echo=FALSE}
+Prediction_Results<-function(model, data, response, explanatory){
+  if (model=='Random Forest'){
+    results<-RF_Predict(data, response, explanatory)
+  } else if (model=='Decision Tree'){
+    results<-DT_Predict(data, response, explanatory)
+  } else if (model=='Naive Bayes'){
+    results<-NB_Predict(data, response, explanatory)
+  } else if (model=='Support Vector Machine'){
+    results<-SV_Predict(data, response, explanatory)
+  }
+  return (results)
+}
+```
+#Combined Scoring and Prediction Functions
+```{r, echo=FALSE}
+Combined_Results<-function(data, response, explanatory){
+  score_results<-Scoring_Results(data, response, explanatory)
+
+  #print(score_results)
+  
+  type<-unique(score_results$Score_Type)
+
+  top_results<-droplevels(score_results[which.max(score_results$Score), ])
+  
+  print(top_results)
+  #return(top_results)
+  
+  prediction_results<-Prediction_Results(top_results$Model, data, response, explanatory)
+  
+  return(prediction_results)
+}
+```
+
+#Load Raw Data and Libraries
+```{r,echo=FALSE}
+options(warn=-1)
+
+Attacks <- read.csv("C:/Users/bethany.earnest/Desktop/Harvard/Spring2016/Shark_Attack_Data_4-7-2016.csv")
+Activities<-read.csv("C:/Users/bethany.earnest/Desktop/Harvard/Spring2016/Project/Sam_Activities_4-30-2016.csv")
+Species<-read.csv("C:/Users/bethany.earnest/Desktop/Harvard/Spring2016/Project/Sam_Species_4-30-2016.csv")
+Temp<-read.csv("C:/Users/bethany.earnest/Desktop/Harvard/Spring2016/Project/Ruth_Temp_5-1-2016.csv")
+
+Activities$Case.Number<-Activities$CaseNumber
+Activities$CaseNumber<-NULL
+
+Species$Case.Number<-Species$CaseNumber
+Species$CaseNumber<-NULL
+
+Temp$Case.Number<-Temp$CaseNumber
+Temp$CaseNumber<-NULL
+
+library(dplyr)
+
+Attacks<-left_join(Attacks, Activities, by="Case.Number")
+rm(Activities)
+Attacks<-left_join(Attacks, Species, by="Case.Number")
+rm(Species)
+Attacks<-left_join(Attacks, Temp, by="Case.Number")
+rm(Temp)
+
+Attacks<-droplevels(subset(Attacks, 
+                           Country=="USA" &
+                            Year>1980))
+```
+
+#Wrangle Data
+#Fatal [BETH]
+```{r,echo=FALSE}
+Attacks$Fatal<-Attacks$Fatal..Y.N.
+Attacks$Fatal..Y.N.<-NULL
+
+table(Attacks$Fatal)
+
+Attacks<-droplevels(subset(Attacks, 
+                              !Fatal %in% c("F", "UNKNOWN","") | 
+                                is.na(Fatal)))
+
+table(Attacks$Fatal)
+
+for(i in 1:nrow(Attacks)){
+  for(n in unique(Attacks$Fatal)){
+    Attacks[i,]$Fatal<-ifelse(Attacks[i,]$Fatal!="Y", "N", "Y") 
+  }
+}
+
+table(Attacks$Fatal)
+
+Attacks<-droplevels(Attacks)
+
+table(Attacks$Fatal)
+
+Attacks$Fatal_Binary<-as.numeric(Attacks$Fatal)
+Attacks$Fatal_Binary<-Attacks$Fatal_Binary-1
+```
+#Age [BETH]
+```{r,echo=FALSE}
+#table(Attacks$Age)
+
+Attacks$Age<-as.numeric(Attacks$Age)
+
+hist(Attacks$Age)
+
+Attacks<-droplevels(subset(Attacks, Age>1))
+
+hist(Attacks$Age)
+```
+#Month [BETH]
+```{r,echo=FALSE}
+Attacks$Clean_Date<-as.Date(Attacks$Date, format="%d-%b-%Y")
+
+Attacks$Month<-format(Attacks$Clean_Date, format="%B")
+
+table(is.na(Attacks$Month))
+
+Attacks<-droplevels(subset(Attacks, !is.na(Month)))
+
+table(is.na(Attacks$Month))
+
+Attacks$Clean_Date<-NULL
+```
+#Gender [BETH]
+```{r,echo=FALSE}
+table(Attacks$Sex)
+
+Attacks<-droplevels(subset(Attacks, 
+                              !Sex %in% c("lli") | 
+                                is.na(Sex)))
+
+table(Attacks$Sex)
+
+for(i in 1:nrow(Attacks)){
+  for(n in unique(Attacks$Sex)){
+    Attacks[i,]$Sex<-ifelse(Attacks[i,]$Sex!="F", "M", "F") 
+  }
+}
+
+table(Attacks$Sex)
+
+Attacks<-droplevels(Attacks)
+
+table(Attacks$Sex)
+```
+
+#Species [SAM]
+#Activity [SAM]
+[Activity (Sam)](http://something_blah.html)
+[Activity (Sam)](something_blah.html)
+#Temp [RUTH]
+
+#Address Missing Values
+```{r,echo=FALSE}
+for(i in names(Attacks)){
+  print(names(Attacks[i]))
+  print(table(is.na(Attacks[,i])))
+  
+  #if(names(Attacks[i])=="activity_cat"){
+  #  library(randomForest)
+  #  Attacks[,i]<-na.roughfix(Attacks[,i])
+  #}
+  if(class(Attacks[,i])=="character"){
+    Attacks[,i]<-as.factor(Attacks[,i])
+  }
+}
+```
+
+#Binary Classification
+#Define Variables for Model
+```{r,echo=FALSE}
+library(randomForest)
+Attacks<-na.roughfix(Attacks)
+
+explanatory_vars<- c("Month","Sex","Age","Type")
+Combined_Results(Attacks, "Fatal_Binary", explanatory_vars)
+
+explanatory_vars<- c("Month","Area","Sex","Age","Type")
+Combined_Results(Attacks, "Fatal_Binary", explanatory_vars)
+
+explanatory_vars<- c("Month","Area","Sex","Age","Type", "activity_cat")
+Combined_Results(Attacks, "Fatal_Binary", explanatory_vars)
+
+explanatory_vars<- c("Month","Area","Sex","Age","Type", "activity_cat", "species_cat")
+Combined_Results(Attacks, "Fatal_Binary", explanatory_vars)
+
+explanatory_vars<- c("Month","Area","Sex","Age","Type", "activity_cat", "species_cat", "temp")
+Combined_Results(Attacks, "Fatal_Binary", explanatory_vars)
+```
+#Results
+```{r,echo=FALSE}
+Monthly_Results<-Attacks %>% group_by(Month) %>% summarize(Probability=mean(Fatal_Binary)) %>% arrange(desc(Probability))
+Gender_Results<-Attacks %>% group_by(Month, Sex) %>% summarize(Probability=mean(Fatal_Binary)) %>% arrange(desc(Probability))
+
+Female_Results<-Attacks %>% filter(Sex=='F') %>% group_by(Month, activity_cat) %>% summarize(Probability=mean(Fatal_Binary)) %>% arrange(desc(Probability))
+
+Male_Results<-Attacks %>% filter(Sex=='M') %>% group_by(Month, activity_cat) %>% summarize(Probability=mean(Fatal_Binary)) %>% arrange(desc(Probability))
+
+Activity_Results<-Attacks %>% group_by(activity_cat) %>% summarize(Probability=mean(Fatal_Binary)) %>% arrange(desc(Probability))
+
+setwd("C:/Users/bethany.earnest/Desktop/Harvard/Spring2016/Project/")
+```

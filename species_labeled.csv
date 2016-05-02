@@ -1,7 +1,7 @@
 CaseNumber,species_cat
 2016.03.03.R,NA
 2016.03.02,sand tiger
-2016.02.10.R,NA
+2016.02.10.R,no shark
 2016.02.10,NA
 2016.01.28,reef
 2016.01.24.b,bull
@@ -24,7 +24,7 @@ CaseNumber,species_cat
 2015.10.25,white
 2015.10.21,NA
 2015.10.19,spinner
-2015.10.17.b,NA
+2015.10.17.b,no shark
 2015.10.17.a,tiger
 2015.10.13,NA
 2015.10.09.a,tiger
@@ -60,7 +60,7 @@ CaseNumber,species_cat
 2015.07.19,white
 2015.07-10,white
 2015.07.08,NA
-2015.07.06,NA
+2015.07.06,no shark
 2015.07.04.b,NA
 2015.07.03,white
 2015.07.02,white
@@ -94,7 +94,7 @@ CaseNumber,species_cat
 2015.04.13,blue
 2015.04.12,bull
 2015.04.03,bull
-2015.03.31,NA
+2015.03.31,no shark
 2015.03.29,NA
 2015.03.26,white
 2015.03.21,mako
@@ -112,8 +112,8 @@ CaseNumber,species_cat
 2015.01.19.a,NA
 2015.01.17,NA
 2015.01.16,NA
-2015.01.08,NA
-2015.01.06,oceanic white
+2015.01.08,no shark
+2015.01.06,white
 2015.01.03,raggedtooth
 2015.01.01,NA
 2014.12.29.a,white
@@ -139,7 +139,7 @@ CaseNumber,species_cat
 2014.10.02.b,NA
 2014.10.02.a,white
 2014.09.13.R,blacktip
-2014.09.13,NA
+2014.09.13,no shark
 2014.09.09,NA
 2014.09.06,bull
 2014.09.03,white
@@ -179,7 +179,7 @@ CaseNumber,species_cat
 2014.05.22,tawny nurse
 2014.05.14,white
 2014.05.11,NA
-2014.05.10.R,NA
+2014.05.10.R,no shark
 2014.05.06,NA
 2014.05.01,NA
 2014.04.24,reef
@@ -188,7 +188,7 @@ CaseNumber,species_cat
 2014.04.03,white
 2014.03.22.b,NA
 2014.03.22.a,NA
-2014.03.18,NA
+2014.03.18,no shark
 2014.03.12,wobbegong
 2014.03.02,spinner
 2014.02.20,blacktip reef
@@ -224,7 +224,7 @@ CaseNumber,species_cat
 2013.09.01.a,NA
 2013.08.31.b,blacktip
 2013.08.31.a,salmon
-2013.08.29,NA
+2013.08.29,no shark
 2013.08.26,mako
 2013.08.17,white
 2013.08.14,tiger
@@ -255,7 +255,7 @@ CaseNumber,species_cat
 2013.04.10,blacktip reef
 2013.04.02.R,NA
 2013.04.02.a,NA
-2013.03.31,NA
+2013.03.31,no shark
 2013.03.21.R,nurse
 2013.03.16.b,raggedtooth
 2013.03.12,tiger
@@ -277,7 +277,7 @@ CaseNumber,species_cat
 2012.12.02,sand tiger
 2012.12.00,sevengill
 2012.11.30,tiger
-2012.11.27,NA
+2012.11.27,no shark
 2012.11.22,NA
 2012.11.19,NA
 2012.11.04.b,tiger
@@ -305,11 +305,11 @@ CaseNumber,species_cat
 2012.07.14,white
 2012.07.07.a,NA
 2012.07.06,NA
-2012.06.28.R,NA
+2012.06.28.R,no shark
 2012.06.26.c,bull
 2012.06.26.a,reef
 2012.06.20,NA
-2012.06.19,NA
+2012.06.19,no shark
 2012.06.15,nurse
 2012.06.14.d,blacktip
 2012.06.14.c,NA
@@ -365,7 +365,7 @@ CaseNumber,species_cat
 2011.10.11,NA
 2011.10.10,NA
 2011.10.05,NA
-2011.09.30,NA
+2011.09.30,no shark
 2011.09.28.a,white
 2011.09.24.b,bull
 2011.09.16,NA
@@ -539,7 +539,7 @@ CaseNumber,species_cat
 2009.01.10.R,mako
 2009.01.06,broadnose sevengill
 2009.01.00,bull
-2008.12.30,NA
+2008.12.30,no shark
 2008.12.27.d,NA
 2008.12.27.b,white
 2008.12.27.a,white
@@ -614,7 +614,7 @@ CaseNumber,species_cat
 2008.02.06,NA
 2008.01.29,blacktip
 2008.01.27,mako
-2008.01.19.R,NA
+2008.01.19.R,no shark
 2008.01.14,bronze whaler
 2008.01.10,NA
 2008.00.00.b,nurse
@@ -622,7 +622,7 @@ CaseNumber,species_cat
 2007.12.21,NA
 2007.12.18,NA
 2007.12.15,NA
-2007.12.14,not
+2007.12.14,no shark
 2007.12.10,tiger
 2007.12.07,NA
 2007.11.18,reef
@@ -709,7 +709,7 @@ CaseNumber,species_cat
 2006.09.18.R,nurse
 2006.09.14,spinner
 2006.09.11,NA
-2006.09.04,NA
+2006.09.04,no shark
 2006.09.03.a,NA
 2006.08.29.a,bronze whaler
 2006.08.15,NA
@@ -789,7 +789,7 @@ CaseNumber,species_cat
 2005.08.01,bull
 2005.07.22,NA
 2005.07.17.a,NA
-2005.07.15.R,NA
+2005.07.15.R,no shark
 2005.07.15,NA
 2005.07.13,NA
 2005.06.27,bull
@@ -825,7 +825,7 @@ CaseNumber,species_cat
 2005.01.19,NA
 2005.01.14,bronze whaler
 2005.01.08,white
-2004.12.26,NA
+2004.12.26,no shark
 2004.12.16,white
 2004.12.11,bull
 2004.11.27,raggedtooth
@@ -2292,7 +2292,7 @@ CaseNumber,species_cat
 1960.03.28,NA
 1960.02.29,NA
 1960.02.27.b,bronze whaler
-1960.02.27.a,not
+1960.02.27.a,no shark
 1960.02.19,tiger
 1960.02.10.,tiger
 1960.02.07,gray nurse
@@ -2427,7 +2427,7 @@ CaseNumber,species_cat
 1956.08.25,NA
 1956.08.15.b,wobbegong
 1956.08.15.a,white
-1956.08.00.c,porbeagle white
+1956.08.00.c,white
 1956.08.00.a,NA
 1956.07.26,NA
 1956.07.20,white
@@ -2441,8 +2441,8 @@ CaseNumber,species_cat
 1956.00.00.e,sand
 1955.11.16,wobbegong
 1955.10.16,NA
-1955.09.23.b,oceanic species
-1955.09.23.a,oceanic species
+1955.09.23.b,white
+1955.09.23.a,white
 1955.08.30.a,thresher
 1955.08.26,white
 1955.08.08,blue
@@ -2948,7 +2948,7 @@ CaseNumber,species_cat
 1839.04.14,NA
 1837.00.00.a,NA
 1834.07.15.R,hammerhead
-1812.07.00,porbeagle mako
+1812.07.00,mako
 1785.09.26.R,tiger
 1776.00.00.b,white
 1767.00.00,NA
