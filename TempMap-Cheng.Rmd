@@ -251,7 +251,56 @@ points(read_df$lon,read_df$lat, col="red", pch=16)
 Let's plot the shark attacks in USA.  Note that the one far inland was the incident at Alberquerqy aquarium in New Mexicao.
 
 ```{r}
-USA_tab <- SA_tab %>% filter(Country=="USA") %>% left_join(read_df) %>% na.omit()
+USA_tab <- SA_tab %>% filter(Country=="USA") %>% left_join(read_df) %>% na.omit() 
+USA_tab$clusterID <- kmeans(USA_tab[c("lon","lat")],4)$cluster
+
+# https://www.census.gov/geo/maps-data/data/cbf/cbf_counties.html
+# read U.S. counties moderately-simplified GeoJSON file
+us <- readOGR(dsn="us.geo.json", layer="OGRGeoJSON")
+ 
+# convert it to Albers equal area
+us_aea <- spTransform(us, CRS("+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs"))
+us_aea@data$id <- rownames(us_aea@data)
+# extract, then rotate & shift hawaii
+hawaii <- us_aea[us_aea$STATEFP=="15",]
+hawaii <- elide(hawaii, rotate=-35)
+hawaii <- elide(hawaii, shift=c(5400000, -1400000))
+proj4string(hawaii) <- proj4string(us_aea)
+ 
+# remove old states and put new ones back in; note the different order
+# we're also removing puerto rico in this example but you can move it
+# between texas and florida via similar methods to the ones we just used
+us_aea <- us_aea[!us_aea$STATEFP %in% c("02", "15", "72"),]
+us_aea <- rbind(us_aea,hawaii)
+
+# get ready for ggplotting it... this takes a cpl seconds
+# us_map <- fortify(us_aea, region="GEOID")
+us_map <- fortify(us_aea)
+# plot it
+gg <- ggplot()
+gg <- gg + geom_map(data=us_map, map=us_map,
+                    aes(x=long, y=lat, map_id=id, group=group),
+                    fill="white", color="white", size=0.15)
+gg <- gg + geom_map(data=us_aea@data, map=us_map, aes(map_id=GEOID, fill=log(ALAND)),
+                    color="white", size=0.15)
+gg <- gg + scale_fill_gradientn(colours=c(brewer.pal(n=9, name="YlGn")),
+                                na.value="#ffffff", name="County LandnMass Area (log)")
+gg <- gg + labs(title="U.S. County Area Choropleth (log scale)")
+gg <- gg + coord_equal()
+gg <- gg + theme_map()
+gg <- gg + theme(legend.position="right")
+gg <- gg + theme(plot.title=element_text(size=16))
+gg
+
+# color by cluster ID
+map("state", interior = FALSE)
+map("state", boundary = FALSE, col="gray", add = TRUE)
+points(USA_tab$lon, USA_tab$lat, col=USA_tab$clusterID, pch=20)
+
+map("state", interior = FALSE)
+map("state", boundary = FALSE, col="gray", add = TRUE)
+#map("world", c("USA","hawaii","alaska"), xlim=c(-180,-65), ylim=c(19,72),interior = FALSE)
+points(USA_tab$lon,USA_tab$lat, col="red", pch=20)
 
 map("world", fill=TRUE, col="white", bg="lightblue", xlim=c(-130,-60),
     ylim=c(20, 50), mar=c(0,0,0,0))
@@ -277,8 +326,36 @@ usa.states <- readOGR(dsn="states_21basic", layer="states")
 #assume same proj as shapefile!
 proj4string(points) <- proj4string(usa.states)
 #get county polygon point is in
-result <- as.character(over(points, usa.states)$STATE_NAME)
-table(result)
+result <- as.data.frame(table(as.character(over(points, usa.states)$STATE_NAME)))
+colnames(result) <- c("state","count")
+```
+
+Plot the result.
+
+```{r}
+my_data <- cbind(result$count, geocode(as.character(result$state)))
+colnames(my_data) <- c("count","lon","lat")
+usa_center <- as.numeric(geocode("United States"))
+dev.off()
+USAMap <- ggmap(get_googlemap(center=usa_center, scale=2, zoom=4),
+               extent="normal") 
+circle_scale_amt <- 0.1
+USAMap + 
+   geom_point(aes(x=lon, y=lat), data=my_data, col="red", alpha=0.4,
+              size=my_data$count*circle_scale_amt) +
+              scale_size_continuous(range=range(my_data$count))
+dev.off()
+# US map
+states <- map_data("state")
+usamap <- ggplot(states, aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", colour = "black")
+
+# World map, using geom_path instead of geom_polygon
+world <- map_data("world")
+worldmap <- ggplot(world, aes(x=long, y=lat, group=group)) +
+  geom_path() +
+  scale_y_continuous(breaks = (-2:2) * 30) +
+  scale_x_continuous(breaks = (-4:4) * 45)
 ```
 
 ## World Ocean Database
