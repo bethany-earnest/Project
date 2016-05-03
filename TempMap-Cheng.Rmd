@@ -41,12 +41,12 @@ SA_tab %>% group_by(Location) %>% select(CaseNumber,Date,Year,Area) %>%
   dplyr::summarize(n=n())
 ```
 
-# include plots
+# Load map tools.
 
 ```{r worldmap, echo=FALSE}
-library("ggmap")
-library(maptools)
-library(maps)
+suppressMessages(library("ggmap"))
+suppressMessages(library(maptools))
+suppressMessages(library(maps))
 # A test case
 # visited <- c("SFO", "Chennai", "London", "Melbourne")
 # ll.visited <- geocode(visited)
@@ -57,7 +57,7 @@ library(maps)
 # points(visit.x,visit.y, col="red", pch=16)
 ```
 
-A section of geocoding code.
+A section of geocoding code to retrieve (lat,lon) coordinates using Google API.
 
 ```{r geocoding}
 #### This script uses RCurl and RJSONIO to download data from Google's API:
@@ -260,8 +260,8 @@ USA_tab$clusterID <- kmeans(USA_tab[c("lon","lat")],4)$cluster
 A summary table listing number of shark attacks ocurred in each state.
 
 ```{r}
-library(sp)
-library(rgdal)
+suppressMessages(library(sp))
+suppressMessages(library(rgdal))
 
 #lat and long
 coords <- USA_tab %>% select(lon,lat) %>% as.matrix()
@@ -283,8 +283,8 @@ colnames(result) <- c("state","count")
 
 ```{r}
 # plot attack locations based on cluster ID
-library(choroplethr)
-library(choroplethrMaps)
+suppressMessages(library(choroplethr))
+suppressMessages(library(choroplethrMaps))
 
 data(state.regions)
 df_state_count <- state.regions %>% left_join(result,by=c("region"="state")) %>%
@@ -298,32 +298,10 @@ map("state", boundary = FALSE, col="gray", add = TRUE)
 points(USA_tab$lon, USA_tab$lat, col=USA_tab$clusterID, pch=20)
 ```
 
-Plot the result.
+Plot shark attacks in top states.
 
 ```{r}
-my_data <- cbind(result$count, geocode(as.character(result$state)))
-colnames(my_data) <- c("count","lon","lat")
-usa_center <- as.numeric(geocode("United States"))
-dev.off()
-USAMap <- ggmap(get_googlemap(center=usa_center, scale=2, zoom=4),
-               extent="normal") 
-circle_scale_amt <- 0.1
-USAMap + 
-   geom_point(aes(x=lon, y=lat), data=my_data, col="red", alpha=0.4,
-              size=my_data$count*circle_scale_amt) +
-              scale_size_continuous(range=range(my_data$count))
-dev.off()
-# US map
-states <- map_data("state")
-usamap <- ggplot(states, aes(long, lat, group = group)) +
-  geom_polygon(fill = "white", colour = "black")
 
-# World map, using geom_path instead of geom_polygon
-world <- map_data("world")
-worldmap <- ggplot(world, aes(x=long, y=lat, group=group)) +
-  geom_path() +
-  scale_y_continuous(breaks = (-2:2) * 30) +
-  scale_x_continuous(breaks = (-4:4) * 45)
 ```
 
 ## World Ocean Database
@@ -335,23 +313,26 @@ Retrieve the daily mean of sea surface temperature.
 
 ```{r, echo=FALSE}
 source("NOAA_OISST_ncdf4.R")
-#ssts = extractOISSTdaily("daily/sst.day.mean.2014.v2.nc","daily/lsmask.oisst.v2.nc",lonW=0.125,lonE=359.875,latS=-89.875,latN=89.875,date1='2014-11-23',date2='2014-11-24')
-#plotOISST(ssts,1)
 ```
 
 Retrieve the daily mean of sea surface temperature.
 
 ```{r, echo=FALSE}
-# lonW=80,lonE=110,latS=17,latN=35 has values -- A test case
-ssts = extractOISSTdaily("daily/sst.day.mean.2015.v2.nc","daily/lsmask.oisst.v2.nc",lonW=80,lonE=110,latS=20,latN=35,date1='2015-09-20',date2='2015-09-21')
+# lonW=80,lonE=110,latS=17,latN=35 has values -- A test case for the world
+ssts = extractOISSTdaily("daily/sst.day.mean.2015.v2.nc","daily/lsmask.oisst.v2.nc",
+                      lonW=0.125,lonE=359.875,latS=-89.875,latN=89.875,date1='2015-07-23',date2='2015-07-24')
 plotOISST(ssts,1)
-points(98.7,29.94, col="red", pch=16)
-
-day <- 1
-any(!is.na(ssts[, ,day]))
-with_value <- !is.na(ssts[, ,day])
-sst2 <- ssts[, ,day]
-mean(sst2[with_value])
+# for a specific location
+#ssts = extractOISSTdaily("daily/sst.day.mean.2015.v2.nc","daily/lsmask.oisst.v2.nc",
+#   lonW=80,lonE=110,latS=20,latN=35,date1='2015-09-20',date2='2015-09-21')
+#plotOISST(ssts,1)
+# points(98.7,29.94, col="red", pch=16)
+# test the algorithm for retrieving the temp
+#day <- 1
+#any(!is.na(ssts[, ,day]))
+#with_value <- !is.na(ssts[, ,day])
+#sst2 <- ssts[, ,day]
+#mean(sst2[with_value])
 ```
 
 Apply the algorithm to the shark attack data.
