@@ -1,5 +1,5 @@
 ---
-title: "SharkAttack"
+title: "Shark Attack Data Analytics: Exploration on Environment Variables"
 output: html_document
 ---
 
@@ -7,9 +7,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The influence of environmental variables on the presence of white sharks: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3712984/
+The influence of environmental variables on the presence of white sharks can be found from the article, http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3712984/.  White sharks have been implicated in 346 unprovoked attacks on humans worldwide, of which 102 were fatal since 1839, with a steady increase in the frequency of attacks.
 
-White sharks have been implicated in 346 unprovoked attacks on humans worldwide, of which 102 were fatal since 1839, with a steady increase in the frequency of attacks.
+This project targets all the attacks by different species of sharks.  The main goal of the data exploration is to retrieve sea surface temperature (SST) from the NOAA web site, which hosts 36 files storing data from 1981 to 2016.  Each file (~450 MB) stores daily mean SST each year.  The dataset provides the attack location, area, and country, which are used for the conversion to (latitude, longitude) coordinate via google API.  Some locations were not recorded correctly or accurately, so manual correction was required.  Via visualizing the attack locations marked on the map, we can further clean erroneous data points.  The temperature (SST) is one of explanaotry variables in the shark attack data analytics.
+
+## Data set
 
 The following data sets are provided to analyze Shark Attack.
 
@@ -27,9 +29,9 @@ SharkSpecies <- tbl_df(read_csv("Shark_Species_Data_4-7-2016.csv"))
 Sharks <- read_csv("Sharks_4-7-2016.csv")
 ```
 
-## Analyze area, location
+## Analyze area, location, and country
 
-Note that "Unprovoked attacks" are defined as incidents where an attack on a live human occurs in the shark’s natural habitat with no human provocation of the shark.
+Note that "Unprovoked attacks" are defined as incidents where an attack on a live human occurs in the shark’s natural habitat with no human provocation of the shark.  No matter the incident was provoked or unprovoked, there were more than 2000 cases occurred in USA. The section of R code is as follows for country ranking of shark attacks. 
 
 ```{r}
 SA_tab <- tbl_df(SAdata[1:19]) 
@@ -37,11 +39,15 @@ colnames(SA_tab)[1] <- "CaseNumber"
 SA_tab %>% select(CaseNumber,Date,Year,Location,Area,Country) %>% 
   group_by(Location,Area,Country) %>% dplyr::summarize(n=n()) %>% 
   filter(is.na(Area)) %>% View()
-SA_tab %>% group_by(Location) %>% select(CaseNumber,Date,Year,Area) %>%
-  dplyr::summarize(n=n())
+SA_tab %>% group_by(Country) %>% select(CaseNumber,Date,Year,Area) %>%
+  dplyr::summarize(n=n()) %>% arrange(desc(n))
 ```
 
-# Load map tools.
+## Visualization of shark attack locations
+
+The world map and the US map are required in order to show the locations of shark attacks.  Map tools were explored and selected for the study.
+
+### Loading map tools.
 
 ```{r worldmap, echo=FALSE}
 suppressMessages(library("ggmap"))
@@ -63,9 +69,9 @@ A section of geocoding code to retrieve (lat,lon) coordinates using Google API.
 #### This script uses RCurl and RJSONIO to download data from Google's API:
 #### Latitude, longitude, location type (see explanation at the end), formatted address
 #### Notice ther is a limit of 2,500 calls per day
-library(bitops) 
-library(RCurl)
-library(RJSONIO)
+suppressMessages(library(bitops)) 
+suppressMessages(library(RCurl))
+suppressMessages(library(RJSONIO))
  
 url <- function(address, return.call = "json", sensor = "false") {
  root <- "http://maps.google.com/maps/api/geocode/"
@@ -89,8 +95,6 @@ geoCode <- function(address,verbose=FALSE) {
  }
 }
 ```
-
-Let's try a record of shark attack data.
 
 ```{r, echo=FALSE}
 ##Test with a single address
@@ -118,7 +122,8 @@ Let's try a record of shark attack data.
 #APPROXIMATE" indicates that the returned result is approximate.
 ```
 
-Worldside shark attacks.
+### Worldside shark attacks
+The google API has the limitation of 2500 queries per day.  Therefore, the queries were run three times on three machines.  Three files (.rds) were created to save the results, and then read back to a data frame.  Manual corrections were performed for inaccurate or incorrect location inputs.  The correction was only made for USA, which is the country selected for data analysis.  Obviously there are more corrections needed for other countries based on the world attack map.
 
 ```{r}
 world_tab <- SA_tab %>% select(CaseNumber,Location,Area,Country,Date) %>% na.omit()
@@ -248,6 +253,8 @@ points(read_df$lon,read_df$lat, col="red", pch=16)
 #points(as.numeric(loc$lon),as.numeric(loc$lat), col="red", pch=20)
 ```
 
+### Shark attacks in USA
+
 Let's plot the shark attacks in USA.  Note that the one far inland was the incident at Alberquerqy aquarium in New Mexicao.
 
 First, compute kmeans clusters.
@@ -257,7 +264,7 @@ USA_tab <- SA_tab %>% filter(Country=="USA") %>% left_join(read_df) %>% na.omit(
 USA_tab$clusterID <- kmeans(USA_tab[c("lon","lat")],4)$cluster
 ```
 
-A summary table listing number of shark attacks ocurred in each state.
+A summary table listing number of shark attacks ocurred in each state is given in the following.
 
 ```{r}
 suppressMessages(library(sp))
@@ -278,8 +285,10 @@ proj4string(points) <- proj4string(usa.states)
 #get county polygon point is in
 result <- as.data.frame(table(tolower(as.character(over(points, usa.states)$STATE_NAME))))
 colnames(result) <- c("state","count")
+result
 ```
 
+Two representations of attack occurence in each state are plotted: (1) dense color vs. light color, and (2) color by cluster ID.
 
 ```{r}
 # plot attack locations based on cluster ID
@@ -298,24 +307,18 @@ map("state", boundary = FALSE, col="gray", add = TRUE)
 points(USA_tab$lon, USA_tab$lat, col=USA_tab$clusterID, pch=20)
 ```
 
-Plot shark attacks in top states.
-
-```{r}
-
-```
-
 ## World Ocean Database
-### Extracting NOAA sea temperatures with ncdf4
-The demo following the instruction @ http://lukemiller.org/index.php/2014/11/extracting-noaa-sea-surface-temperatures-with-ncdf4/ is coded in the R chunk as follows.
-Data can be downloaded at http://www.ncdc.noaa.gov/oisst.
+### Download NOAA sea temperatures files in the format of ncdf4
 
-Retrieve the daily mean of sea surface temperature.
+The demo following the instruction @ http://lukemiller.org/index.php/2014/11/extracting-noaa-sea-surface-temperatures-with-ncdf4/ is coded in the R chunk as follows.  Data are downloaded from http://www.ncdc.noaa.gov/oisst.
+
+Load the R code for reading the daily SST data from the NOAA data sets.
 
 ```{r, echo=FALSE}
 source("NOAA_OISST_ncdf4.R")
 ```
 
-Retrieve the daily mean of sea surface temperature.
+Retrieve the daily mean of sea surface temperature and plot the distribution on the world map.
 
 ```{r, echo=FALSE}
 # lonW=80,lonE=110,latS=17,latN=35 has values -- A test case for the world
@@ -335,7 +338,9 @@ plotOISST(ssts,1)
 #mean(sst2[with_value])
 ```
 
-Apply the algorithm to the shark attack data.
+### Data retrieval
+
+Apply the algorithm, which is designed to extend the area (5 degrees in each direction) in case a NA value is retured for a specific location, to the shark attack data.  Mean value is calculated from all the values in the extension area.  Temperature values with respect to each attack incident are saved to a file provided for data analytics.
 
 ```{r }
 mean_temp <- function(loc) {
@@ -382,4 +387,3 @@ loc$lat <- loc$lat
 loc$temp <- apply(loc,1,mean_temp)
 write_csv(loc, "USA_LocTemp.csv")
 ```
-

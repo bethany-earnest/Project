@@ -19,7 +19,8 @@
 
 # Author: Luke Miller Nov 25, 2014
 ###############################################################################
-require(ncdf4)	# install.packages('ncdf4') if you don't already have it.
+suppressMessages(require(ncdf4))
+# install.packages('ncdf4') if you don't already have it.
 # NOTE: If you are on Windows, a pre-compiled package is not available directly 
 # from CRAN repositories. You must go to http://cirrus.ucsd.edu/~pierce/ncdf/ 
 # and download the appropriate zip file for your version of Windows and R.
@@ -29,7 +30,8 @@ require(ncdf4)	# install.packages('ncdf4') if you don't already have it.
 # you upgrade to a new version of R. Mac and Linux versions of ncdf4 should be
 # available directly from CRAN.
 
-require(fields) # install.packages('fields') if you don't already have it.
+suppressMessages(require(fields))
+# install.packages('fields') if you don't already have it.
 
 extractOISSTdaily = function(fname,lsmask,lonW,lonE,latS,latN, date1, date2){
   # This function takes 1-year-long NetCDF files of daily SST from the 
